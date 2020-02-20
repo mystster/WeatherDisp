@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "WeatherDisp": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "PUPPETEER_EXECUTABLE_PATH": "C:\\Program Files (x86)\\Google\\Chrome Beta\\Application\\chrome.exe"
+      }
+    }
+  }
+}
