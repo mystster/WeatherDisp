@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PuppeteerSharp;
+using Microsoft.Extensions.Hosting;
 
 namespace WeatherDisp
 {
@@ -16,7 +17,7 @@ namespace WeatherDisp
         [FunctionName("Function1")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
-            ILogger log)
+            ILogger log, Microsoft.Azure.WebJobs.ExecutionContext context)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -47,7 +48,12 @@ namespace WeatherDisp
                         Width = 298,
                         Height = 128
                     });
-                    await page.GoToAsync("https://www.google.com");
+                    //await page.GoToAsync("https://www.google.com");
+                    using(var fs = new StreamReader(Path.Combine(context.FunctionAppDirectory, "test.html")))
+                    {
+                        await page.SetContentAsync(fs.ReadToEnd());
+                    }
+                    var aaa = await page.GetContentAsync();
                     return new FileContentResult(await page.ScreenshotDataAsync(), "image/jpeg");
                 }
             }
