@@ -10,7 +10,7 @@ resources:
 
 variables:
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '44eaa3aa-eb72-4908-8f71-d06edf8c253c'
+  dockerRegistryServiceConnection: '8855f5c5-8d3b-4406-8a80-217bacc0586e'
   imageRepository: 'weatherdisp'
   containerRegistry: 'mystster.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Azure/WeatherDisp/Dockerfile'
