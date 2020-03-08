@@ -13,7 +13,7 @@ variables:
   dockerRegistryServiceConnection: '8855f5c5-8d3b-4406-8a80-217bacc0586e'
   imageRepository: 'weatherdisp'
   containerRegistry: 'mystster.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/Azure/WeatherDisp/Dockerfile'
+  dockerfilePath: '$(Build.SourcesDirectory)/Azure/Functions/WeatherDisp/Dockerfile'
   tag: '$(Build.BuildId)'
   
   # Agent VM image name
