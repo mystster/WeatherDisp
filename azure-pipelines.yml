@@ -37,3 +37,14 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+- stage: Deploy
+  displayName: Deploy to Azure Function for container
+  jobs:
+  - job: Deploy
+    displayName: Deploy
+    steps:
+    - task: AzureFunctionAppContainer@1
+      inputs:
+        azureSubscription: 'WeatherInfo_RG'
+        appName: 'WeatherInfo'
+        imageName: '$(containerReistry)/$(imageRepository:latest'
