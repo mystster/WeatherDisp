@@ -47,4 +47,4 @@ stages:
       inputs:
         azureSubscription: 'WeatherInfo_RG'
         appName: 'WeatherInfo'
-        imageName: '$(containerRegistry)/$(imageRepository):latest'
+        imageName: '$(containerRegistry)/$(imageRepository):$(tag)'
