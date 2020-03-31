@@ -3,7 +3,7 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 schedules:
-  -cron: "0 0 * * *"
+- cron: "0 0 * * *"
   displayName: docker runtime image build
   branches:
     include:
