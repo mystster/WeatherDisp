@@ -2,9 +2,14 @@
 # Build and push an image to Azure Container Registry
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
-trigger:
-- master
-- dev
+schedules:
+  -cron: "0 0 * * *"
+  displayName: docker runtime image build
+  branches:
+    include:
+      - master
+      - dev
+  always: true
 
 resources:
 - repo: self
@@ -15,7 +20,7 @@ variables:
   imageRepository: 'headlesschrome'
   containerRegistry: 'mystster.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Azure/Functions/WeatherDisp/dockerRuntimeImage/Dockerfile'
-  tag: '$(Build.BuildId)'
+  tag: '$(Date:yyMMdd)'
   
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
