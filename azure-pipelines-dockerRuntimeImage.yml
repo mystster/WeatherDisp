@@ -20,7 +20,7 @@ variables:
   imageRepository: 'headlesschrome'
   containerRegistry: 'mystster.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Azure/Functions/WeatherDisp/dockerRuntimeImage/Dockerfile'
-  tag: '$(Date:yyMMdd)'
+  tag: '$(Build.BuildNumber)'
   
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
