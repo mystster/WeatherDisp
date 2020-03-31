@@ -34,7 +34,7 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends yarn \
     #
     # Install typescript globally
-    && npm install -g typescript @vue/cli npm \
+    && npm install -g typescript npm \
     #
     # [Optional] Update a non-root user to match UID/GID - see https://aka.ms/vscode-remote/containers/non-root-user.
     && if [ "$USER_GID" != "1000" ]; then groupmod node --gid $USER_GID; fi \

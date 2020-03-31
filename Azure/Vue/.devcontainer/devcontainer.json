@@ -7,11 +7,14 @@
 	// Use 'settings' to set *default* container specific settings.json values on container create. 
 	// You can edit these settings after create using File > Prefcerences > Settings > Remote.
 	"settings": { 
-		"terminal.integrated.shell.linux": "/bin/bash"
+		"terminal.integrated.shell.linux": "/bin/bash",
+		"terminal.integrated.cwd": "/workspaces/WeatherDisp/Azure/Vue/weatherdisp"
 	},
+	"workspaceFolder": "/workspaces/WeatherDisp/Azure/Vue/weatherdisp",
+	"mounts": ["source=weatherdisp-node-modules,target=/workspaces/WeatherDisp/Azure/Vue/weatherdisp/node_modules,type=volume"],
 
 	// Uncomment the next line if you want to publish any ports.
-	"appPort": [3000],
+	// "appPort": [3000],
 
 	// Uncomment the next line to run commands after the container is created.
 	// "postCreateCommand": "yarn install",
@@ -28,6 +31,10 @@
 		"visualstudioexptteam.vscodeintellicode",
 		"eamodio.gitlens",
 		"donjayamanne.githistory",
-		"codezombiech.gitignore"
+		"codezombiech.gitignore",
+		"aaron-bond.better-comments",
+		"albert.tabout",
+		"dbaeumer.vscode-eslint",
+		"mariusalchimavicius.json-to-ts"
 	]
 }
