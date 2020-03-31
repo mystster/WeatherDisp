@@ -7,7 +7,8 @@ RUN cd /src/dotnet-function-app && \
 
 # To enable ssh & remote debugging on app service change the base image to the one below
 # FROM mcr.microsoft.com/azure-functions/dotnet:3.0-appservice
-FROM mcr.microsoft.com/azure-functions/dotnet:3.0
+# FROM mcr.microsoft.com/azure-functions/dotnet:3.0
+FROM mystster.azurecr.io/headlesschrome:latest
 
 # apt-get install 時にダイアログ抑止
 ENV DEBIAN_FRONTEND=noninteractive \

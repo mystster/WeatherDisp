@@ -14,7 +14,7 @@ variables:
   imageRepository: 'weatherdisp'
   containerRegistry: 'mystster.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Azure/Functions/WeatherDisp/Dockerfile'
-  tag: '$(Build.BuildId)'
+  tag: '$(Build.BuildNumber)'
   
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
