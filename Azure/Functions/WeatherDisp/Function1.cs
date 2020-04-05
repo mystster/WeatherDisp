@@ -37,7 +37,8 @@ namespace WeatherDisp
                 LogProcess = true,
                 Args = new[]
                 {
-                    "--no-sandbox"
+                    "--no-sandbox",
+                    "--disable-web-security"
                 }
             }))
             {
