@@ -1,17 +1,14 @@
 <template>
   <div id="app" v-if="result">
     <div id="weatherToday">
-      <Weather :dailyWeather="result.daily.data[0]"/>
+      <Weather :dailyWeather="result.daily.data[0]" />
       <!-- <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" /> -->
     </div>
     <div id="weatherTommorow">
-      <Weather :dailyWeather="result.daily.data[1]"/>
+      <Weather :dailyWeather="result.daily.data[1]" />
     </div>
-    <div id="tempToday">
-      ccccc
-    </div>
-    <div id="rainyToday">
-      ddddddeee
+    <div id="weatherTable">
+      <Weather-Table :hourlyWeather="result.hourly" />
     </div>
   </div>
 </template>
@@ -19,47 +16,57 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 // import HelloWorld from "./components/HelloWorld.vue";
-import Weather from './components/Weather.vue';
-import {DarkSkyClient, DarkSkyOptions, Units, Language, DarkSky, Forecast} from "darkskyapi-ts";
+import Weather from "./components/Weather.vue";
+import WeatherTable from "./components/WeatherTable.vue";
+import {
+  DarkSkyOptions,
+  Units,
+  Language,
+  DarkSky,
+  Forecast
+} from "darkskyapi-ts";
 
 @Component({
   components: {
-    Weather
+    Weather,
+    WeatherTable
   }
 })
 export default class App extends Vue {
-  result:Forecast | false = false;
-  async created(){
-    const KEY = 'xxxxxxxx';
-    const lat = 1110;
+  result: Forecast | false = false;
+  async created() {
+    const KEY = "xxxxxxxx";
+    const lat = 111;
     const lng = 222;
     // https://api.darksky.net/forecast/xxxxxxxx/1110,222
-    const options : DarkSkyOptions = {
+    const options: DarkSkyOptions = {
       units: Units.SI,
       lang: Language.JAPANESE
-    }
+    };
     const client = new DarkSky(KEY, options);
 
-    this.result = await client.chain(lat, lng)
-    .excludeFlags()
-    .excludeAlerts()
-    .excludeMinutely()
-    .execute()
-    
-    console.log(this.result);
+    this.result = await client
+      .chain(lat, lng)
+      .excludeFlags()
+      .excludeAlerts()
+      .excludeMinutely()
+      .execute();
 
+    console.log(this.result);
   }
 }
 </script>
 
 <style>
-body, html{
+body,
+html {
   width: 100vw;
   height: 100vh;
 }
-body{
+body {
   margin: 0;
   background: pink;
+  font-size: 12px;
 }
 </style>
 <style scoped>
@@ -71,33 +78,28 @@ body{
   color: #2c3e50;
   margin-top: 60px; */
   display: grid;
-  grid-template-columns: 50% 10% 40%;
-  grid-template-rows: 70% auto;
+  grid-template-columns: 50% 50%;
+  grid-template-rows: 60% auto;
   width: 100vw;
   height: 100vh;
 }
 #app > * {
   border: 2px;
 }
-#weatherToday{
-  grid-column: 1 / 2;
+#weatherToday {
+  grid-column: 1;
   grid-row: 1;
   background: orange;
 }
-#weatherTommorow{
-  grid-column: 2 / 4;
+#weatherTommorow {
+  grid-column: 2;
   grid-row: 1;
   background: skyblue;
 }
-#tempToday{
-  grid-column: 1;
+#weatherTable {
+  grid-column: 1 / 3;
   grid-row: 2;
   background: violet;
-}
-#rainyToday{
-  grid-column: 2 / 4;
-  grid-row: 2;
-  background:yellow;
 }
 
 </style>

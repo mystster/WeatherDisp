@@ -1,28 +1,40 @@
 <template>
   <div class="weather" id="weatherPane">
-      <div id="date">{{new Date(dailyWeather.time*1000).toLocaleDateString("ja-JP",{month: 'numeric', day: 'numeric' })}}</div>
-      <div id="icon">
-        <skycon :condition="dailyWeather.icon" width="60" height="60"></skycon>
-      </div>
-      <div id="maxTempLabel">高</div>
-      <div id="minTempLabel">低</div>
-      <div id="rainyLabel">雨</div>
-      <div id="windLabel">風</div>
-      <div id="maxTemp">{{Math.round(dailyWeather.temperatureHigh)}}℃</div>
-      <div id="minTemp">{{Math.round(dailyWeather.temperatureLow)}}℃</div>
-      <div id="rainy">{{Math.round(dailyWeather.precipProbability*10)*10}}%</div>
-      <div id="wind">{{Math.round(dailyWeather.windSpeed)}}m/s</div>
+    <div id="date">
+      {{
+        new Date(dailyWeather.time * 1000).toLocaleDateString("ja-JP", {
+          month: "numeric",
+          day: "numeric"
+        })
+      }}
+    </div>
+    <div id="icon">
+      <skycon :condition="dailyWeather.icon" width="60" height="60"></skycon>
+    </div>
+    <div id="maxTempLabel">高</div>
+    <div id="minTempLabel">低</div>
+    <div id="rainyLabel">雨</div>
+    <div id="windLabel">風</div>
+    <div id="maxTemp">{{ Math.round(dailyWeather.temperatureMax) }}({{Math.round(dailyWeather.apparentTemperatureMax)}})℃</div>
+    <div id="minTemp">{{ Math.round(dailyWeather.temperatureMin) }}({{Math.round(dailyWeather.apparentTemperatureMin)}})℃</div>
+    <div id="rainy">
+      {{ Math.round(dailyWeather.precipProbability * 10) * 10 }}%
+    </div>
+    <div id="wind">{{direction}}{{ Math.round(dailyWeather.windSpeed) }}m/s</div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import {Forecast, DataBlock, } from 'darkskyapi-ts'
+import { DataPoint } from "darkskyapi-ts";
+import * as Util from "../util";
 
 @Component
 export default class Weather extends Vue {
-  @Prop() private dailyWeather?: DataBlock
-  
+  @Prop() private dailyWeather?: DataPoint;
+  get direction(): string {
+    return Util.derectionFromDegree(this.dailyWeather?.windBearing ?? 0);
+  }
 }
 </script>
 
@@ -30,7 +42,7 @@ export default class Weather extends Vue {
 <style scoped>
 #weatherPane {
   display: grid;
-  grid-template-columns: 1.5fr 0.5fr 1fr;
+  grid-template-columns: 1.5fr 0.3fr 1.3fr;
   grid-template-rows: 1fr 1fr 1fr 1fr;
   height: 100%;
   margin: 0;
@@ -38,45 +50,43 @@ export default class Weather extends Vue {
 #weatherPane > * {
   margin: 0;
 }
-#date{
+#date {
   grid-column: 1;
   grid-row: 1;
 }
-#icon{
+#icon {
   grid-column: 1;
   grid-row: 2 / 4;
 }
-#maxTempLabel{
+#maxTempLabel {
   grid-column: 2;
   grid-row: 1;
-  font-size-adjust: inherit;
 }
-#minTempLabel{
+#minTempLabel {
   grid-column: 2;
   grid-row: 2;
 }
-#rainyLabel{
+#rainyLabel {
   grid-column: 2;
   grid-row: 3;
 }
-#windLabel{
+#windLabel {
   grid-column: 2;
   grid-row: 4;
 }
-#maxTemp{
+#maxTemp {
   grid-column: 3;
   grid-row: 1;
-  font-size:100%;
 }
-#minTemp{
+#minTemp {
   grid-column: 3;
   grid-row: 2;
 }
-#rainy{
+#rainy {
   grid-column: 3;
   grid-row: 3;
 }
-#wind{
+#wind {
   grid-column: 3;
   grid-row: 4;
 }
