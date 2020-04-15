@@ -1,0 +1,11 @@
+*/*/local.settings.json
+Vue/.devcontainer
+Vue/.vscode
+Functions/.vs
+.vs
+Functions/WeatherDisp/.devcontainer
+Functions/WeatherDisp/bin
+Functions/WeatherDisp/dockerRuntimeImage
+Functions/WeatherDisp/obj
+Vue/weatherdisp/dist
+Vue/weatherdisp/node_modules
