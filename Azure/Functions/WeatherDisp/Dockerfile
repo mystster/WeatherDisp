@@ -5,7 +5,7 @@ RUN cd /src/dotnet-function-app && \
     mkdir -p /home/site/wwwroot && \
     dotnet publish *.csproj --output /home/site/wwwroot
 
-FROM node AS node-builder
+FROM node:13.10.1-alpine3.10 AS node-builder
 COPY Vue/weatherdisp/ /src
 RUN cd /src && \
 yarn install && \
