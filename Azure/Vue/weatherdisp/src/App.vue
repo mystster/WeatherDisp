@@ -68,6 +68,9 @@ body {
   background: pink;
   font-size: 12px;
 }
+::-webkit-scrollbar{
+  display: none;
+}
 </style>
 <style scoped>
 #app {
