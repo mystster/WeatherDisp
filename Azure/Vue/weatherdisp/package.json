@@ -28,7 +28,9 @@
     "eslint": "^6.7.2",
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-vue": "^6.1.2",
+    "html-webpack-inline-source-plugin": "^0.0.10",
     "prettier": "^1.19.1",
+    "string-replace-loader": "^2.3.0",
     "typescript": "~3.7.5",
     "vue-template-compiler": "^2.6.11"
   }
