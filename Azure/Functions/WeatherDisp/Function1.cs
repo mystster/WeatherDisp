@@ -53,9 +53,12 @@ namespace WeatherDisp
                     //await page.GoToAsync("https://www.google.com");
                     using(var fs = new StreamReader(Path.Combine(context.FunctionAppDirectory, @"dist\index.html")))
                     {
-                        await page.SetContentAsync(fs.ReadToEnd());
+                        await page.SetContentAsync(fs.ReadToEnd(), new NavigationOptions()
+                        {
+                            WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
+                        });
                     }
-                    var aaa = await page.GetContentAsync();
+                    //var aaa = await page.GetContentAsync();
                     return new FileContentResult(await page.ScreenshotDataAsync(), "image/jpeg");
                 }
             }
