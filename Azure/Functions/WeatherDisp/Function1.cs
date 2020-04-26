@@ -49,9 +49,9 @@ namespace WeatherDisp
                         Width = 298,
                         Height = 128
                     });
-                    
+
                     //await page.GoToAsync("https://www.google.com");
-                    using(var fs = new StreamReader(Path.Combine(context.FunctionAppDirectory, @"dist\index.html")))
+                    using (var fs = new StreamReader(Path.Combine(context.FunctionAppDirectory, Path.Combine("dist", "index.html"))))
                     {
                         await page.SetContentAsync(fs.ReadToEnd(), new NavigationOptions()
                         {
