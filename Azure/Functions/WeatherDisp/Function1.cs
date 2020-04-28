@@ -59,7 +59,13 @@ namespace WeatherDisp
                         });
                     }
                     //var aaa = await page.GetContentAsync();
-                    return new FileContentResult(await page.ScreenshotDataAsync(), "image/jpeg");
+                    return new FileContentResult(
+                        await page.ScreenshotDataAsync(
+                            new ScreenshotOptions() {
+                                Type = ScreenshotType.Jpeg,
+                                Quality = 100
+                            }), 
+                        "image/jpeg");
                 }
             }
         }
