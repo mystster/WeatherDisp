@@ -4246,6 +4246,11 @@ date-fns@^2.0.0:
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.11.1.tgz#197b8be1bbf5c5e6fe8bea817f0fe111820e7a12"
   integrity sha512-3RdUoinZ43URd2MJcquzBbDQo+J87cSzB8NkXdZiN5ia1UNyep0oCyitfiL88+R7clGTeq/RniXAc16gWyAu1w==
 
+date-with-offset@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/date-with-offset/-/date-with-offset-1.0.1.tgz#d8f0c8dbd7d03cb0fb7f7346ccdc495e428c7a94"
+  integrity sha1-2PDI29fQPLD7f3NGzNxJXkKMepQ=
+
 de-indent@^1.0.2:
   version "1.0.2"
   resolved "https://registry.npm.taobao.org/de-indent/download/de-indent-1.0.2.tgz#b2038e846dc33baa5796128d0804b455b8c1e21d"

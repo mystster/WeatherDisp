@@ -28,6 +28,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { DataBlock, DataPoint } from "darkskyapi-ts";
+import DateWithOffset from "date-with-offset";
 //import * as Util from "../util";
 
 @Component
@@ -35,6 +36,9 @@ export default class WeatherTable extends Vue {
   @Prop() private hourlyWeather?: DataBlock;
   get tableData(): DataPoint[] | undefined {
       return this.hourlyWeather?.data.filter((d, i) => i % 2 === 0 && i/2 < 7);
+  }
+  getLocalHour(tick: number): number {
+      return new DateWithOffset(tick*1000, 540).getHours();
   }
 }
 </script>
