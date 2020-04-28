@@ -65,7 +65,6 @@ html {
 }
 body {
   margin: 0;
-  background: pink;
   font-size: 12px;
 }
 ::-webkit-scrollbar{
@@ -92,17 +91,14 @@ body {
 #weatherToday {
   grid-column: 1;
   grid-row: 1;
-  background: orange;
 }
 #weatherTommorow {
   grid-column: 2;
   grid-row: 1;
-  background: skyblue;
 }
 #weatherTable {
   grid-column: 1 / 3;
   grid-row: 2;
-  background: violet;
 }
 
 </style>
