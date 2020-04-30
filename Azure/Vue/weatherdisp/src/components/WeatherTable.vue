@@ -3,7 +3,7 @@
       <table>
           <tr>
               <th v-for="item in tableData" :key="item.time">
-                  {{new Date(item.time*1000).getHours()}}
+                  {{getLocalHour(item.time)}}
               </th>
           </tr>
           <tr>

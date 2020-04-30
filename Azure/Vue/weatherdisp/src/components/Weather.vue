@@ -1,12 +1,7 @@
 <template>
   <div class="weather" id="weatherPane">
     <div id="date">
-      {{
-        new Date(dailyWeather.time * 1000).toLocaleDateString("ja-JP", {
-          month: "numeric",
-          day: "numeric"
-        })
-      }}
+      {{getLocalDateString(dailyWeather.time)}}
     </div>
     <div id="icon">
       <skycon :condition="dailyWeather.icon" width="60" height="60"></skycon>
@@ -28,6 +23,7 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { DataPoint } from "darkskyapi-ts";
 import * as Util from "../util";
+import DateWithOffset from "date-with-offset"
 
 @Component
 export default class Weather extends Vue {
@@ -35,6 +31,14 @@ export default class Weather extends Vue {
   get direction(): string {
     return Util.derectionFromDegree(this.dailyWeather?.windBearing ?? 0);
   }
+  getLocalDateString(tick: number): string {
+    const date = new DateWithOffset(tick*1000, 540);
+    return date.localDate().toLocaleDateString("ja-JP", {
+      month: "numeric",
+      day: "numeric"
+    });
+  }
+
 }
 </script>
 
