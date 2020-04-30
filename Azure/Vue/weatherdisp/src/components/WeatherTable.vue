@@ -14,12 +14,7 @@
           </tr>
           <tr>
               <td v-for="item in tableData" :key="item.time">
-                  {{Math.round(item.precipProbability * 10) * 10 }}%
-              </td>
-          </tr>
-          <tr>
-              <td v-for="item in tableData" :key="item.time">
-                  {{ Math.round(item.windSpeed)}}
+                  {{Math.round(item.precipProbability * 10) * 10 }}/{{getWindDirection(item.windBearing)}}{{Math.round(item.windSpeed)}}
               </td>
           </tr>
       </table>
@@ -40,6 +35,9 @@ export default class WeatherTable extends Vue {
   }
   getLocalHour(tick: number): number {
       return new DateWithOffset(tick*1000, 540).getHours();
+  }
+  getWindDirection(deg: number): string{
+      return Util.derectionFromDegree(deg);
   }
 }
 </script>
