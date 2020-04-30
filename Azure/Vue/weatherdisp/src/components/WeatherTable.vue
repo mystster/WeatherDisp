@@ -4,7 +4,7 @@
           <tr>
               <th v-for="item in tableData" :key="item.time">
                   {{getLocalHour(item.time)}}
-                    <skycon id="skycon" :condition="item.icon" width="17" height="17"></skycon>
+                    <skycon class="skycon" :condition="item.icon" width="16" height="16"></skycon>
               </th>
           </tr>
           <tr>
@@ -55,7 +55,7 @@ th, td{
     padding: 0px;
     border: solid 1px black;
 }
-#skycon {
+.skycon {
     margin: -1px 0px -5px 0px;
 }
 </style>
