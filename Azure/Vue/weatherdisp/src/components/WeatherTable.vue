@@ -4,6 +4,7 @@
           <tr>
               <th v-for="item in tableData" :key="item.time">
                   {{getLocalHour(item.time)}}
+                    <skycon id="skycon" :condition="item.icon" width="17" height="17"></skycon>
               </th>
           </tr>
           <tr>
@@ -29,7 +30,7 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { DataBlock, DataPoint } from "darkskyapi-ts";
 import DateWithOffset from "date-with-offset";
-//import * as Util from "../util";
+import * as Util from "../util";
 
 @Component
 export default class WeatherTable extends Vue {
@@ -45,10 +46,16 @@ export default class WeatherTable extends Vue {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-table{
-    border: solid 1px black;
+table {
     border-collapse: collapse;
     border-spacing: 0;
     width: 100%;
+}
+th, td{
+    padding: 0px;
+    border: solid 1px black;
+}
+#skycon {
+    margin: -1px 0px -5px 0px;
 }
 </style>
