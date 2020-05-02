@@ -4,6 +4,7 @@
     <AzureFunctionsVersion>v3</AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.16.1" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions" Version="3.0.6" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.6" />
     <PackageReference Include="PuppeteerSharp" Version="2.0.3" />

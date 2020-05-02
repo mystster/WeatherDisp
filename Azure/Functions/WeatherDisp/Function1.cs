@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PuppeteerSharp;
 using Microsoft.Extensions.Hosting;
+using ImageMagick;
 
 namespace WeatherDisp
 {
@@ -42,31 +43,34 @@ namespace WeatherDisp
                 }
             }))
             {
-                using (var page = await browser.NewPageAsync())
+                using var page = await browser.NewPageAsync();
+                await page.SetViewportAsync(new ViewPortOptions()
                 {
-                    await page.SetViewportAsync(new ViewPortOptions()
-                    {
-                        Width = 298,
-                        Height = 128
-                    });
+                    Width = 298,
+                    Height = 128
+                });
 
-                    //await page.GoToAsync("https://www.google.com");
-                    using (var fs = new StreamReader(Path.Combine(context.FunctionAppDirectory, Path.Combine("dist", "index.html"))))
+                using (var fs = new StreamReader(Path.Combine(context.FunctionAppDirectory, Path.Combine("dist", "index.html"))))
+                {
+                    await page.SetContentAsync(fs.ReadToEnd(), new NavigationOptions()
                     {
-                        await page.SetContentAsync(fs.ReadToEnd(), new NavigationOptions()
-                        {
-                            WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
-                        });
-                    }
-                    //var aaa = await page.GetContentAsync();
-                    return new FileContentResult(
-                        await page.ScreenshotDataAsync(
-                            new ScreenshotOptions() {
-                                Type = ScreenshotType.Jpeg,
-                                Quality = 100
-                            }), 
-                        "image/jpeg");
+                        WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
+                    });
                 }
+
+                using var im = new MagickImage(await page.ScreenshotDataAsync(
+                        new ScreenshotOptions()
+                        {
+                            Type = ScreenshotType.Jpeg,
+                            Quality = 100
+                        }));
+                im.Map(new[] { 
+                    new MagickColor(0, 0, 0), 
+                    new MagickColor(255, 255, 255) 
+                }, new QuantizeSettings() {
+                    DitherMethod = DitherMethod.FloydSteinberg
+                });
+                return new FileContentResult(im.ToByteArray(), "image/jpeg");
             }
         }
     }
