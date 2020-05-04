@@ -69,9 +69,6 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 
-// JPEG decoder library
-#include "JPEGDecoder.h"
-
 
 // for SPI pin definitions see e.g.:
 // C:\Users\xxx\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\2.4.2\variants\generic\common.h
@@ -110,7 +107,6 @@ void setup()
 
   Serial.println("Http access");
 
-  //client.begin(secure,"https://mystster.github.io/WeatherDisp/holder.bmp");
   httpaccess:
     client.begin(secure, "test.example.local", 443, "/path", true);
     int16_t status = client.GET();
@@ -127,63 +123,7 @@ void setup()
       Serial.printf("Memory size is %d\n", size);
       if (size)
       {
-        // uint8_t *image = new uint8_t[size];
-        // read up to 128 byte
-        // int c = stream->readBytes(image, size);
-
-        int b = JpegDec.decode(client.getStreamPtr(), size, 0);
-        jpegInfo();
-        // Serial.printf("c size is %d\n", c);
-        display.fillScreen(GxEPD_WHITE);
-
-        display.setRotation(3);
-
-        uint8 *pImg;
-        int bx, by, x, y;
-        uint16_t px;
-        while (JpegDec.read())
-        {
-          pImg = JpegDec.pImage;
-
-          for (by = 0; by < JpegDec.MCUHeight; by++)
-          {
-
-            for (bx = 0; bx < JpegDec.MCUWidth; bx++)
-            {
-
-              x = JpegDec.MCUx * JpegDec.MCUWidth + bx;
-              y = JpegDec.MCUy * JpegDec.MCUHeight + by;
-
-              if (x < JpegDec.width && y < JpegDec.height)
-              {
-
-                if (JpegDec.comps == 1)
-                { // Grayscale
-
-                  // sprintf(str, "#RGB,%d,%d,%u", x, y, pImg[0]);
-                  // Serial.println(str);
-                  display.drawPixel(x, y, pImg[0] << 8);
-                }
-                else
-                { // RGB
-
-                  // 0.3 * R + 0.59 * G + 0.11 * B
-
-                  // px = pImg[0] * 77 + pImg[1] * 151 + pImg[2] * 28;
-                  px = pImg[0] + pImg[1] + pImg[2] > 650 ? GxEPD_WHITE : GxEPD_BLACK;
-
-                  display.drawPixel(x, y, px);
-                  // display.drawPixel(x, y, pImg[0] > 1 ? GxEPD_WHITE : GxEPD_BLACK);
-                  // if(pImg[0] == 0 && pImg[1] + pImg[2] > 0){
-                  //    Serial.printf("#RGB,%d,%d,%u,%u,%u\n", x, y, pImg[0], pImg[1], pImg[2]);
-                  //    ESP.wdtFeed();
-                  // }
-                }
-              }
-              pImg += JpegDec.comps;
-            }
-          }
-        }
+        drawJpeg(client.getStreamPtr(), size);
         display.update();
         display.powerDown();
       }
@@ -202,27 +142,3 @@ void loop()
 
   delay(10000);
 }
-
-
-
-//====================================================================================
-//   Print information decoded from the Jpeg image
-//====================================================================================
-void jpegInfo() {
-
-  Serial.println("===============");
-  Serial.println("JPEG image info");
-  Serial.println("===============");
-  Serial.print  ("Width      :"); Serial.println(JpegDec.width);
-  Serial.print  ("Height     :"); Serial.println(JpegDec.height);
-  Serial.print  ("Components :"); Serial.println(JpegDec.comps);
-  Serial.print  ("MCU / row  :"); Serial.println(JpegDec.MCUSPerRow);
-  Serial.print  ("MCU / col  :"); Serial.println(JpegDec.MCUSPerCol);
-  Serial.print  ("Scan type  :"); Serial.println(JpegDec.scanType);
-  Serial.print  ("MCU width  :"); Serial.println(JpegDec.MCUWidth);
-  Serial.print  ("MCU height :"); Serial.println(JpegDec.MCUHeight);
-  Serial.println("===============");
-  Serial.println("");
-}
-
-
