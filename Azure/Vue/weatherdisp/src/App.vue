@@ -2,7 +2,6 @@
   <div id="app" v-if="result">
     <div id="weatherToday">
       <Weather :dailyWeather="result.daily.data[0]" />
-      <!-- <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" /> -->
     </div>
     <div id="weatherTommorow">
       <Weather :dailyWeather="result.daily.data[1]" />
@@ -15,7 +14,6 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-// import HelloWorld from "./components/HelloWorld.vue";
 import Weather from "./components/Weather.vue";
 import WeatherTable from "./components/WeatherTable.vue";
 import {
@@ -75,21 +73,13 @@ body {
 </style>
 <style scoped>
 #app {
-  /* font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px; */
   display: grid;
   grid-template-columns: 50% 50%;
   grid-template-rows: 60% auto;
   width: 100vw;
   height: 100vh;
 }
-#app > * {
-  border: 2px;
-}
+
 #weatherToday {
   grid-column: 1;
   grid-row: 1;
