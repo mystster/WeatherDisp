@@ -58,6 +58,7 @@ export default class App extends Vue {
 </script>
 
 <style>
+@import url("http://mplus-webfonts.sourceforge.jp/mplus_webfonts.css");
 body,
 html {
   width: 100vw;
@@ -66,6 +67,7 @@ html {
 body {
   margin: 0;
   font-size: 12px;
+  font-family: "mplus-1p-bold", sans-serif;
 }
 ::-webkit-scrollbar{
   display: none;
