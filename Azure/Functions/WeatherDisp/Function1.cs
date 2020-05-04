@@ -61,16 +61,16 @@ namespace WeatherDisp
                 using var im = new MagickImage(await page.ScreenshotDataAsync(
                         new ScreenshotOptions()
                         {
-                            Type = ScreenshotType.Jpeg,
-                            Quality = 100
+                            Type = ScreenshotType.Png
                         }));
                 im.Map(new[] { 
                     new MagickColor(0, 0, 0), 
                     new MagickColor(255, 255, 255) 
                 }, new QuantizeSettings() {
-                    DitherMethod = DitherMethod.FloydSteinberg
+                    DitherMethod = DitherMethod.No
                 });
-                return new FileContentResult(im.ToByteArray(), "image/jpeg");
+                im.Quality = 100;
+                return new FileContentResult(im.ToByteArray(MagickFormat.Jpg), "image/jpeg");
             }
         }
     }
