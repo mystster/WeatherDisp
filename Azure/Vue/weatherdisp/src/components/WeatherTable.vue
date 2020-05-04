@@ -31,7 +31,7 @@ import * as Util from "../util";
 export default class WeatherTable extends Vue {
   @Prop() private hourlyWeather?: DataBlock;
   get tableData(): DataPoint[] | undefined {
-      return this.hourlyWeather?.data.filter((d, i) => i % 2 === 0 && i/2 < 7);
+      return this.hourlyWeather?.data.filter((d, i) => i % 2 === 0 && i/2 < 6);
   }
   getLocalHour(tick: number): number {
       return new DateWithOffset(tick*1000, 540).getHours();
