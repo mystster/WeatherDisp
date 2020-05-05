@@ -17,6 +17,11 @@
 
 GxIO_Class io(SPI, /*CS=D8*/ D8, /*DC=D3*/ D3, /*RST=D4*/ D4); // arbitrary selection of D3(=0), D4(=2), selected for default of GxEPD_Class
 GxEPD_Class display(io, /*RST=D4*/ D4, /*BUSY=D2*/ D2);        // default selection of D4(=2), D2(=4)
+HTTPClient client;
+BearSSL::WiFiClientSecure secure;
+
+const uint32_t SleepTime = 10 * 60 * 1000;
+uint32_t lastExecTime = 0;
 
 void setup()
 {
@@ -38,44 +43,48 @@ void setup()
 
   Serial.print("Connected, IP address: ");
   Serial.println(WiFi.localIP());
-
-  HTTPClient client;
-  BearSSL::WiFiClientSecure secure;
   secure.setInsecure();
 
   Serial.println("setup done");
 
-  Serial.println("Http access");
-
-  httpaccess:
-    client.begin(secure, "test.example.local", 443, "/path", true);
-    int16_t status = client.GET();
-
-    Serial.println("Http get repuested");
-    if (status == 200)
-    {
-      Serial.println("File GET");
-
-      uint32_t size = client.getSize();
-      Serial.printf("Memory size is %d\n", size);
-      if (size)
-      {
-        drawJpeg(client.getStreamPtr(), size);
-        display.update();
-        display.powerDown();
-      }
-  }
-  else
-  {
-    Serial.println(status);
-    client.end();
-    goto httpaccess;
-  }
 }
 
 void loop()
 {
-  Serial.println("loop");
+  Serial.printf("loop millis:%u\n", millis());
+  if(abs(millis() - lastExecTime) > SleepTime){
+    lastExecTime = millis();
+    getWeatherInfoJpeg();
+  }
+  delay(10*1000);
+}
 
-  delay(10000);
+void getWeatherInfoJpeg(){
+  Serial.println("Http access");
+
+httpaccess:
+  client.begin(secure, "test.example.local", 443, "/path", true);
+  int16_t status = client.GET();
+
+  Serial.println("Http get repuested");
+  if (status == 200)
+  {
+    Serial.println("File GET");
+
+    uint32_t size = client.getSize();
+    Serial.printf("Memory size is %d\n", size);
+    if (size)
+    {
+      drawJpeg(client.getStreamPtr(), size);
+      display.update();
+      display.powerDown();
+      client.end();
+    }
+  }
+  else
+  {
+    Serial.printf("status: %d\n", status);
+    client.end();
+    goto httpaccess;
+  }
 }
