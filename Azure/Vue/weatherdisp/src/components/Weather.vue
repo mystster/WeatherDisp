@@ -4,7 +4,7 @@
       {{getLocalDateString(dailyWeather.time)}}
     </div>
     <div id="icon">
-      <skycon :condition="dailyWeather.icon" width="60" height="60"></skycon>
+      <skycon :condition="dailyWeather.icon"></skycon>
     </div>
     <div id="maxTempLabel">高</div>
     <div id="minTempLabel">低</div>
@@ -43,28 +43,41 @@ export default class Weather extends Vue {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style lang="scss" scoped>
+$iconsize: 40px;
 #weatherPane {
   display: grid;
-  grid-template-columns: 1.5fr 0.3fr 1.3fr;
+  grid-template-columns: 54px 0.3fr 1.3fr;
   grid-template-rows: 1fr 1fr 1fr 1fr;
   height: 100%;
   margin: 0;
 }
-#weatherPane > * {
-  margin: 0;
+.weather {
+  div {
+    margin-top: -3px;
+    margin-bottom: -3px;
+  }
 }
+
 #date {
   grid-column: 1;
   grid-row: 1;
+  margin-top: 0px;
 }
+
 #icon {
   grid-column: 1;
   grid-row: 2 / 4;
+  canvas{
+    width: $iconsize;
+    height: $iconsize;
+  }
 }
+
 #maxTempLabel {
   grid-column: 2;
   grid-row: 1;
+  margin-top: 0px;
 }
 #minTempLabel {
   grid-column: 2;
@@ -77,10 +90,12 @@ export default class Weather extends Vue {
 #windLabel {
   grid-column: 2;
   grid-row: 4;
+  margin-bottom: 0px;
 }
 #maxTemp {
   grid-column: 3;
   grid-row: 1;
+  margin-top: 0px;
 }
 #minTemp {
   grid-column: 3;
@@ -93,5 +108,6 @@ export default class Weather extends Vue {
 #wind {
   grid-column: 3;
   grid-row: 4;
+  margin-bottom: 0px;
 }
 </style>

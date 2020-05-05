@@ -75,7 +75,7 @@ body {
 #app {
   display: grid;
   grid-template-columns: 50% 50%;
-  grid-template-rows: 60% auto;
+  grid-template-rows: 52px auto;
   width: 100vw;
   height: 100vh;
 }
