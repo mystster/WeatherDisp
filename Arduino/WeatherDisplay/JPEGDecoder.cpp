@@ -54,7 +54,11 @@ unsigned char JPEGDecoder::pjpeg_need_bytes_callback(unsigned char* pBuf, unsign
 
 
 int JPEGDecoder::decode( WiFiClient *wifi, uint size, unsigned char pReduce){
-    
+    mcu_x = 0;
+    mcu_y = 0;
+    is_available = 0;
+    reduce = 0;
+
     if(pReduce) reduce = pReduce;
 
     g_nInFileOfs = 0;
