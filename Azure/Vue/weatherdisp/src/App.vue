@@ -9,6 +9,9 @@
     <div id="weatherTable">
       <Weather-Table :hourlyWeather="result.hourly" />
     </div>
+    <div id="weatherNow">
+      <Weather-Now :currentlyWeather="result.currently"></Weather-Now>
+    </div>
   </div>
 </template>
 
@@ -16,6 +19,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import Weather from "./components/Weather.vue";
 import WeatherTable from "./components/WeatherTable.vue";
+import WeatherNow from "./components/WeatherNow.vue";
 import {
   DarkSkyOptions,
   Units,
@@ -27,7 +31,8 @@ import {
 @Component({
   components: {
     Weather,
-    WeatherTable
+    WeatherTable,
+    WeatherNow
   }
 })
 export default class App extends Vue {
@@ -75,7 +80,7 @@ body {
 #app {
   display: grid;
   grid-template-columns: 50% 50%;
-  grid-template-rows: 50px auto;
+  grid-template-rows: 50px 58px auto;
   width: 100vw;
   height: 100vh;
 }
@@ -91,6 +96,10 @@ body {
 #weatherTable {
   grid-column: 1 / 3;
   grid-row: 2;
+}
+#weatherNow {
+  grid-column: 1 / 3;
+  grid-row: 3;
 }
 
 </style>
