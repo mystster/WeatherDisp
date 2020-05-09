@@ -59,6 +59,7 @@ $marginsize: $fontsize * -0.3;
 #dateAndIcon {
   grid-column: 1;
   grid-row: 1 / 3;
+  margin-top: -3px;
   canvas{
     width: $iconsize;
     height: $iconsize;
