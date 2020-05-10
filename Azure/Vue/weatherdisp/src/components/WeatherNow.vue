@@ -23,8 +23,8 @@ export default class WeatherNow extends Vue {
   get localTimeString(): string {
     const date = new Date((this.currentlyWeather?.time ?? 0) *1000);
     return date.toLocaleTimeString("ja-JP",{
-      hour: "numeric",
-      minute: "numeric"
+      hour: "2-digit",
+      minute: "2-digit"
     });
   }
 }
