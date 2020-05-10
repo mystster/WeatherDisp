@@ -21,7 +21,7 @@ import * as Util from "../util";
 export default class WeatherNow extends Vue {
   @Prop() private currentlyWeather?: DataPoint;
   get localTimeString(): string {
-    const date = new Date(this.currentlyWeather?.time*1000);
+    const date = new Date((this.currentlyWeather?.time ?? 0) *1000);
     return date.toLocaleTimeString("ja-JP",{
       hour: "numeric",
       minute: "numeric"
