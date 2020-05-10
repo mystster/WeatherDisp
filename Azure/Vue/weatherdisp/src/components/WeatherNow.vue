@@ -7,7 +7,7 @@
       外:{{ Math.round(currentlyWeather.temperature) }}℃
     </div>
     <div id="humidity">
-      / {{ Math.round(currentlyWeather.precipProbability * 100)}}%
+      / {{ Math.round(currentlyWeather.humidity * 100)}}%
     </div>
   </div>
 </template>
