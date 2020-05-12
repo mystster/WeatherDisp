@@ -11,6 +11,10 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 
+#include <time.h>
+
+#define JST 9*3600
+
 
 // for SPI pin definitions see e.g.:
 // C:\Users\xxx\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\2.4.2\variants\generic\common.h
@@ -44,6 +48,17 @@ void setup()
   Serial.print("Connected, IP address: ");
   Serial.println(WiFi.localIP());
   secure.setInsecure();
+
+  Serial.print("Time syncing");
+  configTime(JST, 0, "ntp.nict.jp", "ntp.jst.mfeed.ad.jp");
+  while (time(NULL) <= 100000){
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("done");
+  time_t t = time(NULL);
+  tm* tm = localtime(&t);
+  Serial.printf("Now: %02d:%02d ", tm->tm_hour, tm->tm_min);
 
   Serial.println("setup done");
 
