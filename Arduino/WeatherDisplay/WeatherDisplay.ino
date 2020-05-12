@@ -40,7 +40,6 @@ void setup()
 
   WiFi.begin(SECRET_SSID, SECRET_SSID_PASSWORD);
 
-  // TODO:Wifiがつながらないことがある
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
