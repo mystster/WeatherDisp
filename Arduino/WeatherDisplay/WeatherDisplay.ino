@@ -13,6 +13,9 @@
 
 #include <time.h>
 
+// Please enter your sensitive data in the Secret tab or arduino_secrets.h(SECRET_xxxx defines)
+#include "arduino_secret.h"
+
 #define JST 9*3600
 
 
@@ -35,7 +38,7 @@ void setup()
 
   display.init(115200); // enable diagnostic output on Serial
 
-  WiFi.begin("ssid", "password");
+  WiFi.begin(SECRET_SSID, SECRET_SSID_PASSWORD);
 
   // TODO:Wifiがつながらないことがある
   while (WiFi.status() != WL_CONNECTED)
@@ -66,7 +69,7 @@ void setup()
 
 void loop()
 {
-  Serial.printf("loop millis:%u\n", millis());
+  Serial.printf("loop millis:%lu\n", millis());
   if(abs(millis() - lastExecTime) > SleepTime){
     lastExecTime = millis();
     getWeatherInfoJpeg();
@@ -78,7 +81,7 @@ void getWeatherInfoJpeg(){
   Serial.println("Http access");
 
 httpaccess:
-  client.begin(secure, "test.example.local", 443, "/path", true);
+  client.begin(secure, SECRET_WEBSITE, 443, SECRET_WEBSITE_PATH, true);
   int16_t status = client.GET();
 
   Serial.println("Http get repuested");

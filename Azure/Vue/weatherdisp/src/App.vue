@@ -38,9 +38,9 @@ import {
 export default class App extends Vue {
   result: Forecast | false = false;
   async created() {
-    const KEY = "xxxxxxxx";
-    const lat = 111;
-    const lng = 222;
+    const KEY = process?.env?.VUE_APP_DARKSKY_KEY ?? "";
+    const lat = process?.env?.VUE_APP_LAT ?? 0;
+    const lng = process?.env?.VUE_APP_LAG ?? 0;
     // https://api.darksky.net/forecast/xxxxxxxx/1110,222
     const options: DarkSkyOptions = {
       units: Units.SI,

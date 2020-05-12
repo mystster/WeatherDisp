@@ -17,6 +17,8 @@
     "vue-skycon": "^1.0.4"
   },
   "devDependencies": {
+    "@types/node": "^13.13.5",
+    "@types/webpack-env": "^1.15.2",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
     "@vue/cli": "^4.2.3",
