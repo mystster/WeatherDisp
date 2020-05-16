@@ -13,7 +13,7 @@ jobs:
   Node_Build:
     runs-on: ubuntu-latest
     env: 
-      node-version: 13.x
+      node-version: 13.10.1
     defaults:
       run:
         working-directory: Azure/Vue/weatherdisp
