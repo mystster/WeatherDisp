@@ -1,0 +1,35 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: build and publish image to Functions
+
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  Node Build:
+    runs-on: ubuntu-latest
+    env: 
+      node-version: 13.x
+    defaults:
+      run:
+        working-directory: Azure/Vue/weatherdisp
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Use Node.js ${{ env.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.node-version }}
+    - name: Install dependencies
+      run: yarn --frozen-lockfile
+    - name: Build
+      run: yarn run build
+    - name: Upload artifacts
+      uses: actions/actions/upload-artifact@v2
+      with:
+        name: vue
+        path: Azure/Vue/weatherdisp/dist/index.html
