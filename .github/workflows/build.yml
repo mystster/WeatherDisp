@@ -50,7 +50,7 @@ jobs:
       - name: Create Dist
         run: mkdir -p dist
       - name: Build and publish
-        run: dotnet publish *.cjproj --output dist && cp dist/bin/runtimes/linux-x64/native/Magick.Native-Q8-x64.dll.so dist/bin/Magick.Native-Q8-x64.dll.so
+        run: dotnet publish *.csproj --output dist && cp dist/bin/runtimes/linux-x64/native/Magick.Native-Q8-x64.dll.so dist/bin/Magick.Native-Q8-x64.dll.so
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
