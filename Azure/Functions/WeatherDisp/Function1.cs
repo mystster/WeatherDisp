@@ -9,27 +9,34 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PuppeteerSharp;
 using Microsoft.Extensions.Hosting;
+using ImageMagick;
+using Azure.WebJobs.Extensions.HttpApi;
+using System.ComponentModel.DataAnnotations;
 
 namespace WeatherDisp
 {
-    public static class Function1
+    public class WeatherInfo : HttpFunctionBase
     {
-        [FunctionName("Function1")]
-        public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+        public WeatherInfo(IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+        {
+        }
+
+        [FunctionName("WeatherInfo")]
+        public async Task<IActionResult> Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] DarkSkyRequestModel model,
             ILogger log, Microsoft.Azure.WebJobs.ExecutionContext context)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            log.LogInformation("WeatherInfo triggerd");
 
-            //string name = req.Query["name"];
-
-            //string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            //dynamic data = JsonConvert.DeserializeObject(requestBody);
-            //name = name ?? data?.name;
-
-            //return name != null
-            //   ? (ActionResult)new OkObjectResult($"Hello, {name}")
-            //   : new BadRequestObjectResult("Please pass a name on the query string or in the request body");
+            if (model == null || !TryValidateModel(model))
+            {
+                return BadRequest(ModelState);
+            }
+            
+            if(context == null)
+            {
+                return BadRequest();
+            }
 
             using (var browser = await Puppeteer.LaunchAsync(new LaunchOptions()
             {
@@ -37,27 +44,56 @@ namespace WeatherDisp
                 LogProcess = true,
                 Args = new[]
                 {
-                    "--no-sandbox"
+                    "--no-sandbox",
+                    "--disable-web-security"
                 }
             }))
             {
-                using (var page = await browser.NewPageAsync())
+                using var page = await browser.NewPageAsync();
+                await page.SetViewportAsync(new ViewPortOptions()
                 {
-                    await page.SetViewportAsync(new ViewPortOptions()
+                    Width = 298,
+                    Height = 128
+                });
+
+                using (var fs = new StreamReader(Path.Combine(context.FunctionAppDirectory, Path.Combine("dist", "index.html"))))
+                {
+                    var html = (await fs.ReadToEndAsync())
+                        .Replace("SET_YOUR_DARKSKY_KEY", model.DarkskyKey, StringComparison.OrdinalIgnoreCase)
+                        .Replace("SET_YOUR_LAT", model.Lat, StringComparison.OrdinalIgnoreCase)
+                        .Replace("SET_YOUR_LAG", model.Lag, StringComparison.OrdinalIgnoreCase);
+                    await page.SetContentAsync(html, new NavigationOptions()
                     {
-                        Width = 298,
-                        Height = 128
+                        WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
                     });
-                    
-                    //await page.GoToAsync("https://www.google.com");
-                    using(var fs = new StreamReader(Path.Combine(context.FunctionAppDirectory, "test.html")))
-                    {
-                        await page.SetContentAsync(fs.ReadToEnd());
-                    }
-                    var aaa = await page.GetContentAsync();
-                    return new FileContentResult(await page.ScreenshotDataAsync(), "image/jpeg");
                 }
+
+                using var im = new MagickImage(await page.ScreenshotDataAsync(
+                        new ScreenshotOptions()
+                        {
+                            Type = ScreenshotType.Png
+                        }));
+                im.Map(new[] { 
+                    new MagickColor(0, 0, 0), 
+                    new MagickColor(255, 255, 255) 
+                }, new QuantizeSettings() {
+                    DitherMethod = DitherMethod.No
+                });
+                im.Quality = 100;
+                return File(im.ToByteArray(MagickFormat.Jpg), "image/jpeg");
             }
         }
+    }
+
+    public class DarkSkyRequestModel
+    {
+        [Required]
+        public string DarkskyKey { get; set; }
+
+        [Required]
+        public string Lat { get; set; }
+
+        [Required]
+        public string Lag { get; set; }
     }
 }

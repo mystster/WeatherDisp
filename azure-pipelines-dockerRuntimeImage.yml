@@ -1,10 +1,17 @@
 # Docker
 # Build and push an image to Azure Container Registry
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+trigger: none
+pr: none
 
-trigger:
-- master
-- dev
+schedules:
+- cron: "0 0 * * 0"
+  displayName: docker runtime image build
+  branches:
+    include:
+      - master
+      - dev
+  always: true
 
 resources:
 - repo: self
@@ -12,10 +19,9 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: '8855f5c5-8d3b-4406-8a80-217bacc0586e'
-  imageRepository: 'weatherdisp'
+  imageRepository: 'headlesschrome'
   containerRegistry: 'mystster.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/Azure/Functions/WeatherDisp/Dockerfile'
-  buildcontext: '$(Build.SourcesDirectory)/Azure'
+  dockerfilePath: '$(Build.SourcesDirectory)/Azure/Functions/WeatherDisp/dockerRuntimeImage/Dockerfile'
   tag: '$(Build.BuildNumber)'
   
   # Agent VM image name
@@ -31,29 +37,12 @@ stages:
       vmImage: $(vmImageName)
     steps:
     - task: Docker@2
-      displayName: Login to ACR
-      inputs:
-        command: login
-        containerRegistry: $(dockerRegistryServiceConnection)
-    - task: Docker@2
       displayName: Build and push an image to container registry
       inputs:
         command: buildAndPush
         repository: $(imageRepository)
         dockerfile: $(dockerfilePath)
-        buildContext: $(buildContext)
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
           latest
-- stage: Deploy
-  displayName: Deploy to Azure Function for container
-  jobs:
-  - job: Deploy
-    displayName: Deploy
-    steps:
-    - task: AzureFunctionAppContainer@1
-      inputs:
-        azureSubscription: 'WeatherInfo_RG'
-        appName: 'WeatherInfo'
-        imageName: '$(containerRegistry)/$(imageRepository):$(tag)'
