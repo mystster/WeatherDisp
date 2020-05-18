@@ -9,13 +9,19 @@
   },
   "dependencies": {
     "core-js": "^3.6.4",
+    "darkskyapi-ts": "^1.0.6",
+    "date-with-offset": "^1.0.1",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.2",
-    "vue-property-decorator": "^8.3.0"
+    "vue-property-decorator": "^8.3.0",
+    "vue-skycon": "^1.0.4"
   },
   "devDependencies": {
+    "@types/node": "^13.13.5",
+    "@types/webpack-env": "^1.15.2",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
+    "@vue/cli": "^4.2.3",
     "@vue/cli-plugin-babel": "~4.2.0",
     "@vue/cli-plugin-eslint": "~4.2.0",
     "@vue/cli-plugin-typescript": "~4.2.0",
@@ -25,7 +31,11 @@
     "eslint": "^6.7.2",
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-vue": "^6.1.2",
+    "html-webpack-inline-source-plugin": "^0.0.10",
     "prettier": "^1.19.1",
+    "sass": "^1.26.5",
+    "sass-loader": "^8.0.2",
+    "string-replace-loader": "^2.3.0",
     "typescript": "~3.7.5",
     "vue-template-compiler": "^2.6.11"
   }
