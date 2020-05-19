@@ -80,10 +80,10 @@ jobs:
       - name: build image and push to github package registory
         uses: docker/build-push-action@v1
         with:
-          username: owner
-          password: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{github.repository}}/weatherdisp
-          registry: ocker.pkg.github.com
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+          repository: ${{ github.repository }}/weatherdisp
+          registry: docker.pkg.github.com
           tags: latest
           tag_with_ref: true
           tag_with_sha: true
