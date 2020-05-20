@@ -15,7 +15,7 @@ env:
   registry: docker.pkg.github.com
   repository: mystster/weatherdisp
   image: weatherdisp
-  functionsApp: testPremiumFunctions
+  functionsApp: testPreFunctions
 
 jobs:
   Build_frontend:
