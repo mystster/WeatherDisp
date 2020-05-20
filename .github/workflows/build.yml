@@ -15,7 +15,7 @@ env:
   registry: docker.pkg.github.com
   repository: mystster/weatherdisp
   image: weatherdisp
-  functionsApp: WeatherInfo
+  functionsApp: testPremiumFunctions
 
 jobs:
   Build_frontend:
@@ -122,7 +122,7 @@ jobs:
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.AZURE_CREDENTIALS_TESTFUNCTION }}
       - name: 'Run Azure Functions Container Action'
         uses: Azure/functions-container-action@v1
         id: fa
