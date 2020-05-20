@@ -106,6 +106,7 @@ jobs:
           tag_with_sha: true
           add_git_labels: true
           path: images
+
   Deploy:
     name: Deploy functions container
     needs: [Build_and_publish_image]
