@@ -125,7 +125,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS_TESTFUNCTION }}
       - name: 'Run Azure Functions Container Action'
-        uses: Azure/functions-container-action@v1
+        uses: Azure/functions-container-action@v1.0.1
         id: fa
         with:
           app-name: ${{ env.functionsApp }}
