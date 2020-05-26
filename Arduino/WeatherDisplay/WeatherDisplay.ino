@@ -63,7 +63,7 @@ void setup()
   Serial.printf("Now: %02d:%02d ", tm->tm_hour, tm->tm_min);
 
   Serial.println("setup done");
-
+  getWeatherInfoJpeg();
 }
 
 void loop()
