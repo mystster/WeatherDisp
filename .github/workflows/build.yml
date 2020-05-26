@@ -1,0 +1,132 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: build and publish image to Functions
+
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  node-version: 13.10.1
+  dotnet: 3.1.100
+  registry: docker.pkg.github.com
+  repository: mystster/weatherdisp
+  image: weatherdisp
+  functionsApp: WeatherInfo
+
+jobs:
+  Build_frontend:
+    name: Build frontend using Vue.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Azure/Vue/weatherdisp
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Use Node.js ${{ env.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.node-version }}
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - uses: actions/cache@v1
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    - name: Install dependencies
+      run: yarn --frozen-lockfile
+    - name: Build
+      run: yarn run build
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: vue
+        path: Azure/Vue/weatherdisp/dist/index.html
+  Build_runtime:
+    name: Build functions.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Azure/Functions/WeatherDisp
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.dotnet }}
+      - name: Create Dist
+        run: mkdir -p dist
+      - name: Build and publish
+        run: dotnet publish *.csproj --output dist
+      - name: Copy Image magick
+        run: cp dist/bin/runtimes/linux-x64/native/Magick.Native-Q8-x64.dll.so dist/bin/Magick.Native-Q8-x64.dll.so
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: functions
+          path: Azure/Functions/WeatherDisp/dist     
+  Build_and_publish_image:
+    name: Build and publish image.
+    runs-on: ubuntu-latest
+    needs: [Build_frontend, Build_runtime]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: vue
+          path: images/artifacts/dist
+      - name: Download runtime artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: functions
+          path: images/artifacts
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: images
+      - name: build image and push to github package registry
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+          repository: ${{ env.repository }}/${{ env.image }}
+          registry: ${{ env.registry }}
+          tags: latest
+          tag_with_ref: true
+          tag_with_sha: true
+          add_git_labels: true
+          path: images
+
+  Deploy:
+    name: Deploy functions container
+    needs: [Build_and_publish_image]
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: Github package repositry login
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.registry }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: 'Run Azure Functions Container Action'
+        uses: Azure/functions-container-action@v1.0.1
+        id: fa
+        with:
+          app-name: ${{ env.functionsApp }}
+          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:latest
