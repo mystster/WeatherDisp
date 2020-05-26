@@ -16,6 +16,7 @@ env:
   repository: mystster/weatherdisp
   image: weatherdisp
   functionsApp: WeatherInfo
+  tag: sha-${{github.sha}}
 
 jobs:
   Build_frontend:
@@ -101,9 +102,8 @@ jobs:
           password: ${{ github.token }}
           repository: ${{ env.repository }}/${{ env.image }}
           registry: ${{ env.registry }}
-          tags: latest
+          tags: latest, ${{env.tag}}
           tag_with_ref: true
-          tag_with_sha: true
           add_git_labels: true
           path: images
 
