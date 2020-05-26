@@ -125,7 +125,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: 'Deploy container'
-        if: github.event_name == 'push' && github.ref == 'master'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: Azure/functions-container-action@v1
         with:
           app-name: ${{ env.functionsApp }}
@@ -138,7 +138,7 @@ jobs:
           image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
           slot-name: stage
       - name: 'Deploy dev container'
-        if: github.event_name == 'push' && github.ref == 'dev'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
         uses: Azure/functions-container-action@v1
         with:
           app-name: ${{ env.functionsApp }}
