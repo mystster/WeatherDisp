@@ -16,6 +16,7 @@ env:
   repository: mystster/weatherdisp
   image: weatherdisp
   functionsApp: WeatherInfo
+  tag: sha-${{github.sha}}
 
 jobs:
   Build_frontend:
@@ -101,9 +102,8 @@ jobs:
           password: ${{ github.token }}
           repository: ${{ env.repository }}/${{ env.image }}
           registry: ${{ env.registry }}
-          tags: latest
+          tags: latest, ${{env.tag}}
           tag_with_ref: true
-          tag_with_sha: true
           add_git_labels: true
           path: images
 
@@ -124,9 +124,23 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: 'Run Azure Functions Container Action'
-        uses: Azure/functions-container-action@v1.0.1
-        id: fa
+      - name: 'Deploy container'
+        if: github.event_name == 'push' && github.ref == 'master'
+        uses: Azure/functions-container-action@v1
         with:
           app-name: ${{ env.functionsApp }}
-          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:latest
+          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
+      - name: 'Deploy staging container'
+        if: github.event_name == 'pull_request'
+        uses: Azure/functions-container-action@v1
+        with:
+          app-name: ${{ env.functionsApp }}
+          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
+          slot-name: stage
+      - name: 'Deploy dev container'
+        if: github.event_name == 'push' && github.ref == 'dev'
+        uses: Azure/functions-container-action@v1
+        with:
+          app-name: ${{ env.functionsApp }}
+          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
+          slot-name: dev
