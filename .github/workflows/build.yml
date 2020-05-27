@@ -6,8 +6,16 @@ name: build and publish image to Functions
 on:
   push:
     branches: [ master, dev ]
+    paths:
+    - 'Azure/Functions/**'
+    - 'Azure/Vue/**'
+    - '.github/**/*.yml'
   pull_request:
     branches: [ master ]
+    paths:
+    - 'Azure/Functions/**'
+    - 'Azure/Vue/**'
+    - '.github/**/*.yml'
 
 env:
   node-version: 13.10.1
