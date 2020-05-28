@@ -6,8 +6,16 @@ name: build and publish image to Functions
 on:
   push:
     branches: [ master, dev ]
+    paths:
+    - 'Azure/Functions/**'
+    - 'Azure/Vue/**'
+    - '.github/**/*.yml'
   pull_request:
     branches: [ master ]
+    paths:
+    - 'Azure/Functions/**'
+    - 'Azure/Vue/**'
+    - '.github/**/*.yml'
 
 env:
   node-version: 13.10.1
@@ -132,6 +140,7 @@ jobs:
           image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
       - name: 'Deploy staging container'
         if: github.event_name == 'pull_request'
+        id: fa
         uses: Azure/functions-container-action@v1
         with:
           app-name: ${{ env.functionsApp }}
@@ -144,3 +153,15 @@ jobs:
           app-name: ${{ env.functionsApp }}
           image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
           slot-name: dev
+      - name: 'comment access url'
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v1
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'URL is ${{steps.fa.outputs.app-url}}'
+            })
