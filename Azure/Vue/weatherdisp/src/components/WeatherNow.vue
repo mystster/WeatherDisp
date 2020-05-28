@@ -16,13 +16,14 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { DataPoint } from "darkskyapi-ts";
 import * as Util from "../util";
+import DateWithOffset from "date-with-offset"
 
 @Component
 export default class WeatherNow extends Vue {
   @Prop() private currentlyWeather?: DataPoint;
   get localTimeString(): string {
-    const date = new Date((this.currentlyWeather?.time ?? 0) *1000);
-    return date.toLocaleTimeString("ja-JP",{
+    const date = new DateWithOffset((this.currentlyWeather?.time ?? 0) *1000, 540);
+    return date.localDate().toLocaleTimeString("ja-JP",{
       hour: "2-digit",
       minute: "2-digit"
     });
