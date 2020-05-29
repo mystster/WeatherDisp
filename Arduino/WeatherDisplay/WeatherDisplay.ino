@@ -12,7 +12,7 @@
 #include <ESP8266HTTPClient.h>
 
 #include <time.h>
-
+#include <Ticker.h>
 // Please enter your sensitive data in the Secret tab or arduino_secrets.h(SECRET_xxxx defines)
 #include "arduino_secret.h"
 
@@ -26,9 +26,16 @@ GxIO_Class io(SPI, /*CS=D8*/ D8, /*DC=D3*/ D3, /*RST=D4*/ D4); // arbitrary sele
 GxEPD_Class display(io, /*RST=D4*/ D4, /*BUSY=D2*/ D2);        // default selection of D4(=2), D2(=4)
 HTTPClient client;
 BearSSL::WiFiClientSecure secure;
+Ticker resetTicker;
 
 const uint32_t SleepTime = 10 * 60 * 1000;
+const uint32_t resetTime = SleepTime* 1.3;
 uint32_t lastExecTime = 0;
+
+void resetESP()
+{
+  ESP.reset();
+}
 
 void setup()
 {
@@ -62,8 +69,9 @@ void setup()
   tm* tm = localtime(&t);
   Serial.printf("Now: %02d:%02d ", tm->tm_hour, tm->tm_min);
 
+  resetTicker.attach_ms(resetTime, resetESP);
   Serial.println("setup done");
-
+  getWeatherInfoJpeg();
 }
 
 void loop()
@@ -96,12 +104,14 @@ httpaccess:
       display.update();
       display.powerDown();
       client.end();
+      resetTicker.attach_ms(resetTime, resetESP);
     }
   }
   else
   {
     Serial.printf("status: %d\n", status);
     client.end();
+    delay(1000 * 10);
     goto httpaccess;
   }
 }
