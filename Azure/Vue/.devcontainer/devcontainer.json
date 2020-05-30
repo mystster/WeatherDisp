@@ -35,6 +35,7 @@
 		"aaron-bond.better-comments",
 		"albert.tabout",
 		"dbaeumer.vscode-eslint",
-		"mariusalchimavicius.json-to-ts"
+		"mariusalchimavicius.json-to-ts",
+		"github.vscode-pull-request-github"
 	]
 }
