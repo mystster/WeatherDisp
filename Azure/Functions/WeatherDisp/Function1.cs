@@ -59,9 +59,9 @@ namespace WeatherDisp
                 using (var fs = new StreamReader(Path.Combine(context.FunctionAppDirectory, Path.Combine("dist", "index.html"))))
                 {
                     var html = (await fs.ReadToEndAsync())
-                        .Replace("SET_YOUR_DARKSKY_KEY", model.DarkskyKey, StringComparison.OrdinalIgnoreCase)
-                        .Replace("SET_YOUR_LAT", model.Lat, StringComparison.OrdinalIgnoreCase)
-                        .Replace("SET_YOUR_LAG", model.Lag, StringComparison.OrdinalIgnoreCase);
+                        .Replace("DARKSKY_KEY_PLACEHOLDER", model.DarkskyKey, StringComparison.OrdinalIgnoreCase)
+                        .Replace("LAT_PLACEHOLDER", model.Lat, StringComparison.OrdinalIgnoreCase)
+                        .Replace("LAG_PLACEHOLDER", model.Lag, StringComparison.OrdinalIgnoreCase);
                     await page.SetContentAsync(html, new NavigationOptions()
                     {
                         WaitUntil = new[] { WaitUntilNavigation.Networkidle0 }
