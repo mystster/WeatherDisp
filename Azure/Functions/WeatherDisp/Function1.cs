@@ -17,6 +17,7 @@ namespace WeatherDisp
 {
     public class WeatherInfo : HttpFunctionBase
     {
+        static int execCounter = 0;
         public WeatherInfo(IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
         }
@@ -26,18 +27,30 @@ namespace WeatherDisp
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] DarkSkyRequestModel model,
             ILogger log, Microsoft.Azure.WebJobs.ExecutionContext context)
         {
-            log.LogInformation("WeatherInfo triggerd");
+            execCounter++;
+            log.LogInformation($"WeatherInfo triggerd, count:{execCounter}");
 
-            if (model == null || !TryValidateModel(model))
-            {
-                return BadRequest(ModelState);
-            }
-            
-            if(context == null)
+            if(model == null || context == null)
             {
                 return BadRequest();
             }
 
+            int maxCount = 0;
+            if(int.TryParse(Environment.GetEnvironmentVariable("MAX_EXEC", EnvironmentVariableTarget.Process), out maxCount) 
+                && maxCount > 0 
+                && execCounter <= maxCount){
+                model.DarkskyKey = Environment.GetEnvironmentVariable("DARKSKY_API", EnvironmentVariableTarget.Process) ?? model.DarkskyKey;
+                model.Lag = Environment.GetEnvironmentVariable("LAG", EnvironmentVariableTarget.Process) ?? model.Lag;
+                model.Lat = Environment.GetEnvironmentVariable("LAT", EnvironmentVariableTarget.Process) ?? model.Lat;
+            }
+
+            if (!TryValidateModel(model))
+            {
+                return BadRequest(ModelState);
+            }
+
+            log.LogInformation($"Lag:{model.Lag}, Lat:{model.Lat}");
+            
             using (var browser = await Puppeteer.LaunchAsync(new LaunchOptions()
             {
                 Headless = true,
