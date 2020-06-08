@@ -16,7 +16,7 @@
 #include "arduino_secret.h"
 
 #define JST 9*3600
-
+#define USER_DATA_ADDR  66
 
 // for SPI pin definitions see e.g.:
 // C:\Users\xxx\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\2.4.2\variants\generic\common.h
@@ -26,10 +26,10 @@ GxEPD_Class display(io, /*RST=D4*/ D4, /*BUSY=D2*/ D2);        // default select
 HTTPClient client;
 BearSSL::WiFiClientSecure secure;
 
-const int32_t getWeatherInfoPeriod = 7;
-const int32_t getCurrentTempPeriod = 10;
+const int32_t getWeatherInfoPeriod = 10 * 60;
+const int32_t getCurrentTempPeriod = 10 * 60;
 const int16_t marginSleepTime = 30;
-const uint32_t USER_DATA_ADDR = 66;
+// const uint32_t USER_DATA_ADDR = 66;
 
 struct {
   time_t getWeatherInfoJpeg;
@@ -78,7 +78,7 @@ void setup()
 
   time_t now = time(NULL);
   tm* tm = localtime(&now);
-  Serial.printf("Now: %02d/%02d %02d:%02d:%02d\n", tm->tm_mon, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+  Serial.printf("Now: %02d/%02d %02d:%02d:%02d\n", tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 
   Serial.println("setup done");
 
