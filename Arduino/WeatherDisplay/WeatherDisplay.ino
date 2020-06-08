@@ -59,7 +59,7 @@ void setup()
   secure.setInsecure();
 
   Serial.print("Time syncing");
-  configTime(JST, 0, "ntp.nict.jp", "ntp.jst.mfeed.ad.jp");
+  configTzTime("JST-9", "ntp.nict.jp", "ntp.jst.mfeed.ad.jp");
   while (time(NULL) <= 100000){
     delay(500);
     Serial.print(".");
