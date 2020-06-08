@@ -68,7 +68,7 @@ void setup()
 
   Serial.println("determine wake reason");
   if (ESP.getResetReason() == "Deep-Sleep Wake"){
-    Serial.println("wakeup from deepSleep");
+    Serial.println("wakeup from deepSleep. restore data from RTC memory");
     ESP.rtcUserMemoryRead(USER_DATA_ADDR, (uint32_t *)&lastExecDate, sizeof(lastExecDate));
   }else{
     Serial.println("normal wakeup. Init data");
@@ -78,7 +78,7 @@ void setup()
 
   time_t now = time(NULL);
   tm* tm = localtime(&now);
-  Serial.printf("Now: %02d:%02d \n", tm->tm_hour, tm->tm_min);
+  Serial.printf("Now: %02d/%02d %02d:%02d:%02d\n", tm->tm_mon, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 
   Serial.println("setup done");
 
@@ -95,7 +95,7 @@ void setup()
   ESP.rtcUserMemoryWrite(USER_DATA_ADDR, (uint32_t *)&lastExecDate, sizeof(lastExecDate));
 
   int32_t sleepTimeSec = min(lastExecDate.getWeatherInfoJpeg + getWeatherInfoPeriod, lastExecDate.getCurrentTemp + getCurrentTempPeriod) - now;
-  Serial.printf("deep sleep %d sec\n", sleepTimeSec);
+  Serial.printf("deep sleep %d seconds!\n", sleepTimeSec);
   ESP.deepSleep(sleepTimeSec * 1000000 / 0.977, RF_DEFAULT);
 }
 
