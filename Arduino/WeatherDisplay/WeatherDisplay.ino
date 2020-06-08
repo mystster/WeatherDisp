@@ -39,11 +39,11 @@ void resetESP()
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(74880);
   Serial.println();
   Serial.println("setup");
 
-  display.init(115200); // enable diagnostic output on Serial
+  display.init(74880); // enable diagnostic output on Serial
 
   WiFi.begin(SECRET_SSID, SECRET_SSID_PASSWORD);
 
