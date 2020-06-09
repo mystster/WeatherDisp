@@ -97,7 +97,7 @@ void setup()
 
   int32_t sleepTimeSec = min(lastExecDate.getWeatherInfoJpeg + getWeatherInfoPeriod, lastExecDate.getCurrentTemp + getCurrentTempPeriod) - now;
   Serial.printf("deep sleep %d seconds!\n", sleepTimeSec);
-  ESP.deepSleep(sleepTimeSec * 1000000 / 0.977, RF_DEFAULT);
+  ESP.deepSleep(sleepTimeSec * 1000000 / 0.95, RF_DEFAULT);
 }
 
 void loop()
