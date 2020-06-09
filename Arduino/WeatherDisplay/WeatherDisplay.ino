@@ -29,7 +29,6 @@ BearSSL::WiFiClientSecure secure;
 const int32_t getWeatherInfoPeriod = 10 * 60;
 const int32_t getCurrentTempPeriod = 10 * 60;
 const int16_t marginSleepTime = 30;
-// const uint32_t USER_DATA_ADDR = 66;
 
 struct {
   time_t getWeatherInfoJpeg;
@@ -83,8 +82,7 @@ void setup()
   Serial.println("setup done");
 
   if(now - lastExecDate.getWeatherInfoJpeg > getWeatherInfoPeriod - marginSleepTime){
-    // getWeatherInfoJpeg();
-    Serial.println("getWeatherInfoJpeg()");
+    getWeatherInfoJpeg();
     lastExecDate.getWeatherInfoJpeg = now;
   }
   if(now - lastExecDate.getCurrentTemp > getCurrentTempPeriod - marginSleepTime){
