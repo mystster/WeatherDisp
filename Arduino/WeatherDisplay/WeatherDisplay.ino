@@ -92,6 +92,7 @@ void setup()
     Serial.println("getCurrentTemp()");
     lastExecDate.getCurrentTemp = now;
   }
+  // 最終実行日時を保存
   ESP.rtcUserMemoryWrite(USER_DATA_ADDR, (uint32_t *)&lastExecDate, sizeof(lastExecDate));
 
   int32_t sleepTimeSec = min(lastExecDate.getWeatherInfoJpeg + getWeatherInfoPeriod, lastExecDate.getCurrentTemp + getCurrentTempPeriod) - now;
