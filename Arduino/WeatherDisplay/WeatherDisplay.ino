@@ -82,6 +82,7 @@ void setup()
   Serial.println("setup done");
 
   if(now - lastExecDate.getWeatherInfoJpeg > getWeatherInfoPeriod - marginSleepTime){
+    Serial.println("getWeatherInfoJpeg()");
     getWeatherInfoJpeg();
     lastExecDate.getWeatherInfoJpeg = now;
   }
