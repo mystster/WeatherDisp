@@ -32,16 +32,16 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
-      - name: 'Env'
-        env:
-          REF: ${{github.head_ref}}
-        run: |
-          echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
-          echo '::set-env name=SLOT_NAME::${REF//_/-}'
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: 'Env'
+        env:
+          BASE_SLOT: ${{github.head_ref}}
+        run: |
+          echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
+          echo '::set-env name=SLOT_NAME::${BASE_SLOT//_/-}'
       - name: 'Create Azure functions slot'
         run: |
           az functionapp deployment slot create --name ${{env.functionsApp}} --slot $SLOT_NAME --configuration-source stage --resource-group $RESOURCE_GROUP
@@ -161,9 +161,9 @@ jobs:
         if: github.event_name == 'pull_request'
         id: env
         env:
-          REF: ${{github.head_ref}}
+          BASE_SLOT: ${{github.head_ref}}
         run: |
-          echo '::set-output name=SLOT_NAME::${REF//_/-}'
+          echo '::set-output name=SLOT_NAME::${BASE_SLOT//_/-}'
       - name: 'Deploy PR container'
         if: github.event_name == 'pull_request'
         id: fa
