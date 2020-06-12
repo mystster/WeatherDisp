@@ -36,7 +36,7 @@ jobs:
         env:
           REF: ${{github.head_ref}}
         run: |
-          echo '::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r \'.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup\'`'
+          echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
           echo '::set-env name=SLOT_NAME::${REF//_/-}'
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
