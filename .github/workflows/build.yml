@@ -30,8 +30,10 @@ jobs:
   Create_Slot:
     name: Create Azure functions slot if PR
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.action == 'opened'
-    steps:        
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: dump
+        run: echo toJson(${{github.event}})
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
         with:
