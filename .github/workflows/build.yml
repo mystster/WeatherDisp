@@ -27,6 +27,20 @@ env:
   tag: sha-${{github.sha}}
 
 jobs:
+  Create_Slot:
+    name: Create Azure functions slot if PR
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    steps:        
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: 'Create Azure functions slot'
+        run: |
+          RESOUCE_GROUP=`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
+          az functionapp deployment slot create --name ${{env.functionsApp}} --slot ${{github.event.pull_request.head_ref}} --configuration-source stage --resource-group $RESOUCE_GROUP
+          az functionapp config appsettings set --name ${{env.functionsApp}} --slot ${{github.event.pull_request.head_ref}} --resource-group $RESOUCE_GROUP --settings "$(az functionapp config appsettings list --name ${{env.functionsApp}} --slot stage --resource-group  | jq '[.[] | select(.name=="DARKSKY_API" or .name=="LAG" or .name=="LAT")]')"
   Build_frontend:
     name: Build frontend using Vue.
     runs-on: ubuntu-latest
