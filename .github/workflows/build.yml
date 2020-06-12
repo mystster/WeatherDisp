@@ -32,17 +32,20 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
+      - name: 'Env'
+        env:
+          REF: ${{github.head_ref}}
+        run: |
+          echo '::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`'
+          echo '::set-env name=SLOT_NAME::${REF//_/-}'
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: 'Create Azure functions slot'
-        env:
-          NEW_SLOT: ${{github.head_ref}}
         run: |
-          RESOURCE_GROUP=`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
-          az functionapp deployment slot create --name ${{env.functionsApp}} --slot ${NEW_SLOT//_/-} --configuration-source stage --resource-group $RESOURCE_GROUP
-          az functionapp config appsettings set --name ${{env.functionsApp}} --slot ${NEW_SLOT//_/-} --resource-group $RESOURCE_GROUP --settings "$(az functionapp config appsettings list --name ${{env.functionsApp}} --slot stage --resource-group $RESOURCE_GROUP  | jq '[.[] | select(.name=="DARKSKY_API" or .name=="LAG" or .name=="LAT")]')"
+          az functionapp deployment slot create --name ${{env.functionsApp}} --slot $SLOT_NAME --configuration-source stage --resource-group $RESOURCE_GROUP
+          az functionapp config appsettings set --name ${{env.functionsApp}} --slot $SLOT_NAME --resource-group $RESOURCE_GROUP --settings "$(az functionapp config appsettings list --name ${{env.functionsApp}} --slot stage --resource-group $RESOURCE_GROUP  | jq '[.[] | select(.name=="DARKSKY_API" or .name=="LAG" or .name=="LAT")]')"
   Build_frontend:
     name: Build frontend using Vue.
     runs-on: ubuntu-latest
@@ -154,14 +157,21 @@ jobs:
         with:
           app-name: ${{ env.functionsApp }}
           image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
-      - name: 'Deploy staging container'
+      - name: 'Env'
+        if: github.event_name == 'pull_request'
+        id: env
+        env:
+          REF: ${{github.head_ref}}
+        run: |
+          echo '::set-output name=SLOT_NAME::${REF//_/-}'
+      - name: 'Deploy PR container'
         if: github.event_name == 'pull_request'
         id: fa
         uses: Azure/functions-container-action@v1
         with:
           app-name: ${{ env.functionsApp }}
           image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
-          slot-name: stage
+          slot-name: ${{steps.env.outputs.SLOT_NAME}}
       - name: 'Deploy dev container'
         if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
         uses: Azure/functions-container-action@v1
