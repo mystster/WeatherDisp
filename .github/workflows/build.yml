@@ -33,7 +33,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: dump
-        run: echo toJson(${{github.event}})
+        run: echo ${{toJson(github.event)}}
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
         with:
