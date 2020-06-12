@@ -40,9 +40,9 @@ jobs:
         env:
           NEW_SLOT: ${{github.head_ref}}
         run: |
-          RESOUCE_GROUP=`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
-          az functionapp deployment slot create --name ${{env.functionsApp}} --slot ${NEW_SLOT//_/-} --configuration-source stage --resource-group $RESOUCE_GROUP
-          az functionapp config appsettings set --name ${{env.functionsApp}} --slot ${NEW_SLOT//_/-} --resource-group $RESOUCE_GROUP --settings "$(az functionapp config appsettings list --name ${{env.functionsApp}} --slot stage --resource-group  | jq '[.[] | select(.name=="DARKSKY_API" or .name=="LAG" or .name=="LAT")]')"
+          RESOURCE_GROUP=`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
+          az functionapp deployment slot create --name ${{env.functionsApp}} --slot ${NEW_SLOT//_/-} --configuration-source stage --resource-group $RESOURCE_GROUP
+          az functionapp config appsettings set --name ${{env.functionsApp}} --slot ${NEW_SLOT//_/-} --resource-group $RESOURCE_GROUP --settings "$(az functionapp config appsettings list --name ${{env.functionsApp}} --slot stage --resource-group $RESOURCE_GROUP  | jq '[.[] | select(.name=="DARKSKY_API" or .name=="LAG" or .name=="LAT")]')"
   Build_frontend:
     name: Build frontend using Vue.
     runs-on: ubuntu-latest
