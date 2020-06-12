@@ -30,7 +30,7 @@ jobs:
   Create_Slot:
     name: Create Azure functions slot if PR
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
     steps:
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
@@ -136,7 +136,7 @@ jobs:
 
   Deploy:
     name: Deploy functions container
-    needs: [Build_and_publish_image]
+    needs: [Create_Slot, Build_and_publish_image]
     runs-on: ubuntu-latest
     steps:
       - name: checkout
