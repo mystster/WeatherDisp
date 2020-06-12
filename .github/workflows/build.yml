@@ -37,11 +37,10 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: 'Env'
-        env:
-          BASE_SLOT: ${{github.head_ref}}
         run: |
           echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
-          echo '::set-env name=SLOT_NAME::${BASE_SLOT//_/-}'
+          BASE='${{github.head_ref}}'
+          echo '::set-env name=SLOT_NAME::${BASE//_/-}'
       - name: 'Create Azure functions slot'
         run: |
           az functionapp deployment slot create --name ${{env.functionsApp}} --slot $SLOT_NAME --configuration-source stage --resource-group $RESOURCE_GROUP
@@ -160,10 +159,9 @@ jobs:
       - name: 'Env'
         if: github.event_name == 'pull_request'
         id: env
-        env:
-          BASE_SLOT: ${{github.head_ref}}
         run: |
-          echo '::set-output name=SLOT_NAME::${BASE_SLOT//_/-}'
+          BASE='${{github.head_ref}}'
+          echo '::set-output name=SLOT_NAME::${BASE//_/-}'
       - name: 'Deploy PR container'
         if: github.event_name == 'pull_request'
         id: fa
