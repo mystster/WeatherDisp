@@ -136,9 +136,10 @@ jobs:
           add_git_labels: true
           path: images
 
-  Deploy:
-    name: Deploy functions container
+  DeployPush:
+    name: Deploy functions container from Push
     needs: [Create_Slot, Build_and_publish_image]
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -154,20 +155,36 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: 'Deploy container'
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: Azure/functions-container-action@v1
         with:
           app-name: ${{ env.functionsApp }}
           image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
+
+  DeployPR:
+    name: Deploy functions container from PR
+    needs: [Create_Slot, Build_and_publish_image]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: Github package repositry login
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.registry }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: 'Env'
-        if: github.event_name == 'pull_request'
         id: env
         env:
           REF: ${{github.head_ref}}
         run: |
           echo ::set-output name=SLOT_NAME::${REF//_/-}
       - name: 'Deploy PR container'
-        if: github.event_name == 'pull_request'
         id: fa
         uses: Azure/functions-container-action@v1
         with:
@@ -175,7 +192,6 @@ jobs:
           image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
           slot-name: ${{steps.env.outputs.SLOT_NAME}}
       - name: 'comment access url'
-        if: github.event_name == 'pull_request'
         uses: actions/github-script@v1
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
