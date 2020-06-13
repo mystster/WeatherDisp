@@ -28,21 +28,23 @@ env:
 
 jobs:
   Create_Slot:
-    name: Create Azure functions slot if PR
+    name: Create Azure functions slot if PR opened
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.action == 'opened'
     steps:
       - name: 'Login via Azure CLI'
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: 'Env'
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
         env:
           REF: ${{github.head_ref}}
         run: |
           echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
           echo ::set-env name=SLOT_NAME::${REF//_/-}
       - name: 'Create Azure functions slot'
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
         run: |
           az functionapp deployment slot create --name ${{env.functionsApp}} --slot $SLOT_NAME --configuration-source stage --resource-group $RESOURCE_GROUP > /dev/null
           az functionapp config appsettings set --name ${{env.functionsApp}} --slot $SLOT_NAME --resource-group $RESOURCE_GROUP --settings "$(az functionapp config appsettings list --name ${{env.functionsApp}} --slot stage --resource-group $RESOURCE_GROUP  | jq '[.[] | select(.name=="DARKSKY_API" or .name=="LAG" or .name=="LAT" or .name=="MAX_EXEC")]')" > /dev/null
