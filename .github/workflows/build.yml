@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       SLOT_NAME: ${{steps.run.outputs.slotname}}
-      SHORT_TAG: ${{steps.run.oupputs.shorttag}}
+      TAG_NAME: ${{steps.run.oupputs.shorttag}}
       BRANCH: ${{steps.run.outputs.branch}}
     env:
       HEAD_REF: ${{github.head_ref}}
