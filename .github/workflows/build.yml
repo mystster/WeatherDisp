@@ -41,6 +41,7 @@ jobs:
       - id: run
         run: |
           echo "::set-output name=slotname::${HEAD_REF//_/-}"
+          echo "${SHA::7}"
           echo "::set-output name=branch::${REF##*/}"
       - id: run2
         run : echo "::set-output name=shorttag::${SHA::7}"
