@@ -41,7 +41,7 @@ jobs:
       - id: run
         run: |
           echo "::set-output name=slotname::${HEAD_REF//_/-}"
-          echo "::set-output name=tag::${SHA::7}"
+          echo "::set-output name=tag::${SHA}"
           echo "::set-output name=branch::${REF##*/}"
   Create_Slot:
     name: Create Azure functions slot if PR opened
