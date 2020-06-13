@@ -31,19 +31,15 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       SLOT_NAME: ${{steps.run.outputs.slotname}}
-      TAG_NAME: ${{steps.run.oupputs.shorttag}}
       BRANCH: ${{steps.run.outputs.branch}}
+      TAG_NAME: ${{steps.run.outputs.branch}}-${{github.sha}}
     env:
       HEAD_REF: ${{github.head_ref}}
-      SHA: ${{github.sha}}
       REF: ${{github.ref}}
     steps:
       - id: run
         run: |
           echo "::set-output name=slotname::${HEAD_REF//_/-}"
-          DATA=${SHA::7}
-          echo $DATA
-          echo "::set-output name=shorttag::$DATA"
           echo "::set-output name=branch::${REF##*/}"
   Create_Slot:
     name: Create Azure functions slot if PR opened
@@ -144,7 +140,7 @@ jobs:
           password: ${{ github.token }}
           repository: ${{ env.repository }}/${{ env.image }}
           registry: ${{ env.registry }}
-          tags: latest, ${{needs.Prepare.outputs.BRANCH}}-latest, ${{needs.Prepare.outputs.BRANCH}}-${{needs.Prepare.outputs.SHORT_TAG}}
+          tags: latest, ${{needs.Prepare.outputs.BRANCH}}-latest, ${{needs.Prepare.outputs.TAG_NAME}}
           tag_with_ref: true
           add_git_labels: true
           path: images
@@ -171,7 +167,7 @@ jobs:
         uses: Azure/functions-container-action@v1
         with:
           app-name: ${{ env.functionsApp }}
-          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{needs.Prepare.outputs.BRANCH}}-${{needs.Prepare.outputs.SHORT_TAG}}
+          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{needs.Prepare.outputs.TAG_NAME}}
 
   DeployPR:
     name: Deploy functions container from PR
@@ -196,7 +192,7 @@ jobs:
         uses: Azure/functions-container-action@v1
         with:
           app-name: ${{ env.functionsApp }}
-          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{needs.Prepare.outputs.BRANCH}}-${{needs.Prepare.outputs.SHORT_TAG}}
+          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{needs.Prepare.outputs.TAG_NAME}}
           slot-name: ${{needs.Prepare.outputs.SLOT_NAME}}
       - name: 'comment access url'
         uses: actions/github-script@v1
