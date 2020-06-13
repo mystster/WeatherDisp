@@ -26,7 +26,7 @@ env:
   functionsApp: WeatherInfo
 
 jobs:
-  CancelPrebiousRuns:
+  CancelPreviousRuns:
     runs-on: ubuntu-latest
     steps:
       - name: Cancel Previous Runs
