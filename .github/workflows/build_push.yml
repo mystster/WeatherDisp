@@ -1,17 +1,11 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: build and publish image to Functions
+name: (Push)build and publish image to Functions
 
 on:
   push:
     branches: [ master]
-    paths:
-    - 'Azure/Functions/**'
-    - 'Azure/Vue/**'
-    - '.github/**/*.yml'
-  pull_request:
-    branches: [ master ]
     paths:
     - 'Azure/Functions/**'
     - 'Azure/Vue/**'
@@ -26,49 +20,21 @@ env:
   functionsApp: WeatherInfo
 
 jobs:
-  CancelPreviousRuns:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.4.0
-        with:
-          access_token: ${{ github.token }}
   Prepare:
     name: Prepare environment variable
     runs-on: ubuntu-latest
     outputs:
-      SLOT_NAME: ${{steps.run.outputs.slotname}}
       BRANCH: ${{steps.run.outputs.branch}}
       TAG_NAME: ${{steps.run.outputs.branch}}-${{steps.run.outputs.stag}}
     env:
-      HEAD_REF: ${{github.head_ref}}
       REF: ${{github.ref}}
       STAG: ${{github.sha}}
     steps:
       - id: run
         run: |
-          echo "::set-output name=slotname::${HEAD_REF//_/-}"
-          echo "::set-output name=branch::${REF##*/}"
+          DATA=${REF##*/}
+          echo "::set-output name=branch::${DATA//_/-}"
           echo "::set-output name=stag::${STAG::7}"
-  Create_Slot:
-    name: Create Azure functions slot if PR opened
-    runs-on: ubuntu-latest
-    needs: Prepare
-    steps:
-      - name: 'Login via Azure CLI'
-        if: github.event_name == 'pull_request' && github.event.action == 'opened'
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: 'Env'
-        if: github.event_name == 'pull_request' && github.event.action == 'opened'
-        run: |
-          echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
-      - name: 'Create Azure functions slot'
-        if: github.event_name == 'pull_request' && github.event.action == 'opened'
-        run: |
-          az functionapp deployment slot create --name ${{env.functionsApp}} --slot ${{needs.Prepare.outputs.SLOT_NAME}} --configuration-source stage --resource-group $RESOURCE_GROUP > /dev/null
-          az functionapp config appsettings set --name ${{env.functionsApp}} --slot ${{needs.Prepare.outputs.SLOT_NAME}} --resource-group $RESOURCE_GROUP --settings "$(az functionapp config appsettings list --name ${{env.functionsApp}} --slot stage --resource-group $RESOURCE_GROUP  | jq '[.[] | select(.name=="DARKSKY_API" or .name=="LAG" or .name=="LAT" or .name=="MAX_EXEC")]')" > /dev/null
   Build_frontend:
     name: Build frontend using Vue.
     runs-on: ubuntu-latest
@@ -156,8 +122,7 @@ jobs:
 
   DeployPush:
     name: Deploy functions container from Push
-    needs: [Prepare, Create_Slot, Build_and_publish_image]
-    if: github.event_name == 'push'
+    needs: [Prepare, Build_and_publish_image]
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -177,40 +142,3 @@ jobs:
         with:
           app-name: ${{ env.functionsApp }}
           image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{needs.Prepare.outputs.TAG_NAME}}
-
-  DeployPR:
-    name: Deploy functions container from PR
-    needs: [Prepare, Create_Slot, Build_and_publish_image]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: Github package repositry login
-        uses: azure/docker-login@v1
-        with:
-          login-server: ${{ env.registry }}
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-      - name: 'Login via Azure CLI'
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: 'Deploy PR container'
-        id: fa
-        uses: Azure/functions-container-action@v1
-        with:
-          app-name: ${{ env.functionsApp }}
-          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{needs.Prepare.outputs.TAG_NAME}}
-          slot-name: ${{needs.Prepare.outputs.SLOT_NAME}}
-      - name: 'comment access url'
-        uses: actions/github-script@v1
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: 'URL is ${{steps.fa.outputs.app-url}}/api/WeatherInfo'
-            })

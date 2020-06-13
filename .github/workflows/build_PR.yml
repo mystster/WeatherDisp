@@ -1,0 +1,183 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: (PR)build and publish image to Functions
+
+on:
+  pull_request:
+    branches: [ master ]
+    paths:
+    - 'Azure/Functions/**'
+    - 'Azure/Vue/**'
+    - '.github/**/*.yml'
+
+env:
+  node-version: 13.10.1
+  dotnet: 3.1.100
+  registry: docker.pkg.github.com
+  repository: mystster/weatherdisp
+  image: weatherdisp
+  functionsApp: WeatherInfo
+
+jobs:
+  CancelPreviousRuns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.4.0
+        with:
+          access_token: ${{ github.token }}
+  Prepare:
+    name: Prepare environment variable
+    runs-on: ubuntu-latest
+    outputs:
+      SLOT_NAME: ${{steps.run.outputs.safeBranch}}
+      BRANCH: ${{steps.run.outputs.safeBranch}}
+      TAG_NAME: ${{steps.run.outputs.safeBranch}}-${{steps.run.outputs.stag}}
+    env:
+      HEAD_REF: ${{github.head_ref}}
+      STAG: ${{github.sha}}
+    steps:
+      - id: run
+        run: |
+          echo "::set-output name=safeBranch::${HEAD_REF//_/-}"
+          echo "::set-output name=stag::${STAG::7}"
+  Create_Slot:
+    name: Create Azure functions slot if PR opened
+    runs-on: ubuntu-latest
+    needs: Prepare
+    steps:
+      - name: 'Login via Azure CLI'
+        if: github.event.action == 'opened'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: 'Env'
+        if: github.event.action == 'opened'
+        run: |
+          echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
+      - name: 'Create Azure functions slot'
+        if: github.event.action == 'opened'
+        run: |
+          az functionapp deployment slot create --name ${{env.functionsApp}} --slot ${{needs.Prepare.outputs.SLOT_NAME}} --configuration-source stage --resource-group $RESOURCE_GROUP > /dev/null
+          az functionapp config appsettings set --name ${{env.functionsApp}} --slot ${{needs.Prepare.outputs.SLOT_NAME}} --resource-group $RESOURCE_GROUP --settings "$(az functionapp config appsettings list --name ${{env.functionsApp}} --slot stage --resource-group $RESOURCE_GROUP  | jq '[.[] | select(.name=="DARKSKY_API" or .name=="LAG" or .name=="LAT" or .name=="MAX_EXEC")]')" > /dev/null
+  Build_frontend:
+    name: Build frontend using Vue.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Azure/Vue/weatherdisp
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Use Node.js ${{ env.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.node-version }}
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - uses: actions/cache@v1
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    - name: Install dependencies
+      run: yarn --frozen-lockfile
+    - name: Build
+      run: yarn run build
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: vue
+        path: Azure/Vue/weatherdisp/dist/index.html
+  Build_runtime:
+    name: Build functions.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Azure/Functions/WeatherDisp
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.dotnet }}
+      - name: Create Dist
+        run: mkdir -p dist
+      - name: Build and publish
+        run: dotnet publish *.csproj --output dist
+      - name: Copy Image magick
+        run: cp dist/bin/runtimes/linux-x64/native/Magick.Native-Q8-x64.dll.so dist/bin/Magick.Native-Q8-x64.dll.so
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: functions
+          path: Azure/Functions/WeatherDisp/dist     
+  Build_and_publish_image:
+    name: Build and publish image.
+    runs-on: ubuntu-latest
+    needs: [Prepare, Build_frontend, Build_runtime]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: vue
+          path: images/artifacts/dist
+      - name: Download runtime artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: functions
+          path: images/artifacts
+      - name: build image and push to github package registry
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+          repository: ${{ env.repository }}/${{ env.image }}
+          registry: ${{ env.registry }}
+          tags: latest, ${{needs.Prepare.outputs.BRANCH}}-latest, ${{needs.Prepare.outputs.TAG_NAME}}
+          tag_with_ref: true
+          add_git_labels: true
+          path: images
+
+  DeployPR:
+    name: Deploy functions container from PR
+    needs: [Prepare, Create_Slot, Build_and_publish_image]
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: Github package repositry login
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.registry }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: 'Deploy PR container'
+        id: fa
+        uses: Azure/functions-container-action@v1
+        with:
+          app-name: ${{ env.functionsApp }}
+          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{needs.Prepare.outputs.TAG_NAME}}
+          slot-name: ${{needs.Prepare.outputs.SLOT_NAME}}
+      - name: 'comment access url'
+        uses: actions/github-script@v1
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'URL is ${{steps.fa.outputs.app-url}}/api/WeatherInfo'
+            })
