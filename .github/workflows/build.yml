@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       SLOT_NAME: ${{steps.run.outputs.slotname}}
-      SHORT_TAG: ${{steps.run2.oupputs.shorttag}}
+      SHORT_TAG: ${{steps.run.oupputs.shorttag}}
       BRANCH: ${{steps.run.outputs.branch}}
     env:
       HEAD_REF: ${{github.head_ref}}
@@ -45,8 +45,6 @@ jobs:
           echo $DATA
           echo "::set-output name=shorttag::$DATA"
           echo "::set-output name=branch::${REF##*/}"
-      - id: run2
-        run : echo "::set-output name=shorttag::${SHA::7}"
   Create_Slot:
     name: Create Azure functions slot if PR opened
     runs-on: ubuntu-latest
