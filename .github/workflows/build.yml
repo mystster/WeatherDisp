@@ -135,9 +135,6 @@ jobs:
         with:
           name: functions
           path: images/artifacts
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: images
       - name: build image and push to github package registry
         uses: docker/build-push-action@v1
         with:
