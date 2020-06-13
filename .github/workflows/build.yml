@@ -24,12 +24,29 @@ env:
   repository: mystster/weatherdisp
   image: weatherdisp
   functionsApp: WeatherInfo
-  tag: sha-${{github.sha}}
 
 jobs:
+  Prepare:
+    name: Prepare environment variable
+    runs-on: ubuntu-latest
+    outputs:
+      SLOT_NAME: ${{steps.run.outputs.slotname}}
+      SHORT_TAG: ${{steps.run.oupputs.tag}}
+      BRANCH: ${{steps.run.outputs.branch}}
+    env:
+      HEAD_REF: ${{github.head_ref}}
+      SHA: ${{github.sha}}
+      REF: ${{github.ref}}
+    steps:
+      - id: run
+        run: |
+          echo ::set-output name=slotname::${HEAD_REF//_/-}
+          echo ::set-output name=tag::${SHA:0:7}
+          echo ::set-output name=branch::${REF##*/}
   Create_Slot:
     name: Create Azure functions slot if PR opened
     runs-on: ubuntu-latest
+    needs: Prepare
     steps:
       - name: 'Login via Azure CLI'
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
@@ -38,16 +55,13 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: 'Env'
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
-        env:
-          REF: ${{github.head_ref}}
         run: |
           echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
-          echo ::set-env name=SLOT_NAME::${REF//_/-}
       - name: 'Create Azure functions slot'
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
         run: |
-          az functionapp deployment slot create --name ${{env.functionsApp}} --slot $SLOT_NAME --configuration-source stage --resource-group $RESOURCE_GROUP > /dev/null
-          az functionapp config appsettings set --name ${{env.functionsApp}} --slot $SLOT_NAME --resource-group $RESOURCE_GROUP --settings "$(az functionapp config appsettings list --name ${{env.functionsApp}} --slot stage --resource-group $RESOURCE_GROUP  | jq '[.[] | select(.name=="DARKSKY_API" or .name=="LAG" or .name=="LAT" or .name=="MAX_EXEC")]')" > /dev/null
+          az functionapp deployment slot create --name ${{env.functionsApp}} --slot ${{needs.Prepare.outputs.SLOT_NAME}} --configuration-source stage --resource-group $RESOURCE_GROUP > /dev/null
+          az functionapp config appsettings set --name ${{env.functionsApp}} --slot ${{needs.Prepare.outputs.SLOT_NAME}} --resource-group $RESOURCE_GROUP --settings "$(az functionapp config appsettings list --name ${{env.functionsApp}} --slot stage --resource-group $RESOURCE_GROUP  | jq '[.[] | select(.name=="DARKSKY_API" or .name=="LAG" or .name=="LAT" or .name=="MAX_EXEC")]')" > /dev/null
   Build_frontend:
     name: Build frontend using Vue.
     runs-on: ubuntu-latest
@@ -107,7 +121,7 @@ jobs:
   Build_and_publish_image:
     name: Build and publish image.
     runs-on: ubuntu-latest
-    needs: [Build_frontend, Build_runtime]
+    needs: [Prepare, Build_frontend, Build_runtime]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -131,14 +145,14 @@ jobs:
           password: ${{ github.token }}
           repository: ${{ env.repository }}/${{ env.image }}
           registry: ${{ env.registry }}
-          tags: latest, ${{env.tag}}
+          tags: latest, ${{needs.Prepare.outputs.BRANCH}}-latest, ${{needs.Prepare.outputs.BRANCH}}-${{needs.Prepare.outputs.SHORT_TAG}}
           tag_with_ref: true
           add_git_labels: true
           path: images
 
   DeployPush:
     name: Deploy functions container from Push
-    needs: [Create_Slot, Build_and_publish_image]
+    needs: [Prepare, Create_Slot, Build_and_publish_image]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -158,11 +172,11 @@ jobs:
         uses: Azure/functions-container-action@v1
         with:
           app-name: ${{ env.functionsApp }}
-          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
+          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{needs.Prepare.outputs.BRANCH}}-${{needs.Prepare.outputs.SHORT_TAG}}
 
   DeployPR:
     name: Deploy functions container from PR
-    needs: [Create_Slot, Build_and_publish_image]
+    needs: [Prepare, Create_Slot, Build_and_publish_image]
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
@@ -178,19 +192,13 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: 'Env'
-        id: env
-        env:
-          REF: ${{github.head_ref}}
-        run: |
-          echo ::set-output name=SLOT_NAME::${REF//_/-}
       - name: 'Deploy PR container'
         id: fa
         uses: Azure/functions-container-action@v1
         with:
           app-name: ${{ env.functionsApp }}
-          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
-          slot-name: ${{steps.env.outputs.SLOT_NAME}}
+          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{needs.Prepare.outputs.BRANCH}}-${{needs.Prepare.outputs.SHORT_TAG}}
+          slot-name: ${{needs.Prepare.outputs.SLOT_NAME}}
       - name: 'comment access url'
         uses: actions/github-script@v1
         with:
