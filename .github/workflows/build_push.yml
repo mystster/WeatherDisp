@@ -35,6 +35,29 @@ jobs:
           DATA=${REF##*/}
           echo "::set-output name=branch::${DATA//_/-}"
           echo "::set-output name=stag::${STAG::7}"
+  Check:
+    name: Check this commit is merged commit
+    runs-on: ubuntu-latest
+    outputs:
+      IS_MERGED_COMMIT: ${{steps.mergedCommitsSha.outputs.result}}
+    steps: 
+      - name: merge commit information
+        id: mergedCommitsSha
+        uses: actions/github-script@v2
+        with:
+          previews: groot
+          debug: true
+          script: |
+            const info = await github.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha
+            });
+            console.dir(info);
+            return info.data.some(d => d.merge_commit_sha === context.sha);
+      - name: dump
+        run: echo ${{steps.mergedCommitsSha.outputs.result}}
+
   Build_frontend:
     name: Build frontend using Vue.
     runs-on: ubuntu-latest

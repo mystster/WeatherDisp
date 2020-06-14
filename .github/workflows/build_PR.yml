@@ -28,29 +28,6 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-  Check:
-    name: Check this commit is merged commit
-    runs-on: ubuntu-latest
-    outputs:
-      IS_MERGED_COMMIT: ${{steps.mergedCommitsSha.outputs.result}}
-    steps: 
-      - name: merge commit information
-        id: mergedCommitsSha
-        uses: actions/github-script@v2
-        with:
-          previews: groot
-          debug: true
-          script: |
-            const info = await github.repos.listPullRequestsAssociatedWithCommit({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: "${{github.event.pull_request.head.sha}}"
-            });
-            console.dir(info);
-            return info.data.some(d => d.merge_commit_sha === context.sha);
-      - name: dump
-        run: echo ${{steps.mergedCommitsSha.outputs.result}}
-
   Prepare:
     name: Prepare environment variable
     runs-on: ubuntu-latest
