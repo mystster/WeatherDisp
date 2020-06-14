@@ -32,7 +32,7 @@ jobs:
     name: Prepare environment variable
     runs-on: ubuntu-latest
     outputs:
-      SLOT_NAME: ${{steps.run.outputs.safeBranch}}
+      SLOT_NAME: ${{github.event.number}}-${{steps.run.outputs.safeBranch}}
       BRANCH: ${{steps.run.outputs.safeBranch}}
       TAG_NAME: ${{steps.run.outputs.safeBranch}}-${{steps.run.outputs.stag}}
     env:
