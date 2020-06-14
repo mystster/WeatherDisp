@@ -1,0 +1,47 @@
+name: Delete Slot when RP closed and not merged
+
+on:
+  pull_request:
+    types: [ closed ]
+    branches: [ master ]
+    paths:
+    - 'Azure/Functions/**'
+    - 'Azure/Vue/**'
+    - '.github/**/*.yml'
+
+env:
+  node-version: 13.10.1
+  dotnet: 3.1.100
+  registry: docker.pkg.github.com
+  repository: mystster/weatherdisp
+  image: weatherdisp
+  functionsApp: WeatherInfo
+
+jobs:
+  Prepare:
+    name: Prepare environment variable
+    runs-on: ubuntu-latest
+    outputs:
+      SLOT_NAME: ${{github.event.number}}-${{steps.run.outputs.safeBranch}}
+    env:
+      HEAD_REF: ${{github.head_ref}}
+    steps:
+      - id: run
+        run: |
+          echo "::set-output name=safeBranch::${HEAD_REF//_/-}"
+  DeleteSlot:
+    name: Delte slot
+    runs-on: ubuntu-latest
+    if: ${{github.event.pull_request.merged == "true"}}
+    needs: Prepare
+    steps:
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: 'Env'
+        run: |
+          echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
+      - name: delte slot
+        run: |
+          az functionapp deployment slot delete --name ${{env.functionsApp}} --slot ${{needs.Prepare.outputs.SLOT_NAME}} --resource-group $RESOURCE_GROUP > /dev/null
