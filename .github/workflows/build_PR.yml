@@ -44,7 +44,7 @@ jobs:
             const info = await github.repos.listPullRequestsAssociatedWithCommit({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              commit_sha: ${{github.sha}}
+              commit_sha: "${{github.event.pull_request.head.sha}}"
             });
             console.dir(info);
             return info.data.some(d => d.merge_commit_sha === context.sha);
@@ -60,7 +60,7 @@ jobs:
       TAG_NAME: ${{steps.run.outputs.safeBranch}}-${{steps.run.outputs.stag}}
     env:
       HEAD_REF: ${{github.head_ref}}
-      STAG: ${{github.sha}}
+      STAG: ${{github.event.pull_request.head.sha}}
     steps:
       - id: run
         run: |
