@@ -40,13 +40,13 @@ jobs:
         with:
           previews: groot
           script: |
-            const info = await github.repos.listPullRequestsAssociatedWithCommit({
+            const {data} = await github.repos.listPullRequestsAssociatedWithCommit({
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha
             });
-            console.dir(info);
-            return info.some(d => d.merge_commit_sha === context.sha);
+            console.dir(data);
+            return data.some(d => d.merge_commit_sha === context.sha);
       - name: dump
         run: echo ${{steps.mergedCommitsSha.outputs.result}}
 
