@@ -27,6 +27,28 @@ jobs:
         uses: styfle/cancel-workflow-action@0.4.0
         with:
           access_token: ${{ github.token }}
+
+  Check:
+    name: Check this commit is merged commit
+    runs-on: ubuntu-latest
+    outputs:
+      IS_MERGED_COMMIT: ${{steps.mergedCommitsSha.outputs.result}}
+    steps: 
+      - name: merge commit information
+        id: mergedCommitsSha
+        uses: actions/github-script@v2
+        with:
+          previews: groot
+          script: |
+            const info = github.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha
+            });
+            return info.some(d => d.merge_commit_sha === context.sha);
+      - name: dump
+        run: echo ${{steps.mergedCommitsSha.outputs.result}}
+
   Prepare:
     name: Prepare environment variable
     runs-on: ubuntu-latest
