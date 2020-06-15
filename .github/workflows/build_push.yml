@@ -1,17 +1,11 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: build and publish image to Functions
+name: (Push)build and publish image to Functions
 
 on:
   push:
-    branches: [ master, dev ]
-    paths:
-    - 'Azure/Functions/**'
-    - 'Azure/Vue/**'
-    - '.github/**/*.yml'
-  pull_request:
-    branches: [ master ]
+    branches: [ master]
     paths:
     - 'Azure/Functions/**'
     - 'Azure/Vue/**'
@@ -24,12 +18,81 @@ env:
   repository: mystster/weatherdisp
   image: weatherdisp
   functionsApp: WeatherInfo
-  tag: sha-${{github.sha}}
 
 jobs:
+  Prepare:
+    name: Prepare environment variable
+    runs-on: ubuntu-latest
+    outputs:
+      BRANCH: ${{steps.run.outputs.branch}}
+      TAG_NAME: ${{steps.run.outputs.branch}}-${{steps.run.outputs.stag}}
+    env:
+      REF: ${{github.ref}}
+      STAG: ${{github.sha}}
+    steps:
+      - id: run
+        run: |
+          DATA=${REF##*/}
+          echo "::set-output name=branch::${DATA//_/-}"
+          echo "::set-output name=stag::${STAG::7}"
+  Check:
+    name: Check this commit is merged commit
+    runs-on: ubuntu-latest
+    outputs:
+      IS_MERGED_COMMIT: ${{steps.mergedCommitsSha.outputs.result}}
+      SLOT_NAME: ${{steps.mergedCommitsSha.outputs.pr_number}}-${{steps.mergedCommitsSha.outputs.head_ref}}
+    steps: 
+      - name: merge commit information
+        id: mergedCommitsSha
+        uses: actions/github-script@v2
+        with:
+          previews: groot
+          debug: true
+          script: |
+            const info = await github.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha
+            });
+            console.dir(info);
+            const pr = info.data.find(d => d.merge_commit_sha === context.sha);
+            if(pr){
+              console.dir(pr);
+              console.dir(pr.head);
+              core.setOutput("head_ref", pr.head.ref);
+              core.setOutput("pr_number", pr.number);
+              return true;
+            }
+            return false;
+      - name: dump
+        run: |
+          echo ${{steps.mergedCommitsSha.outputs.result}}
+          echo ${{steps.mergedCommitsSha.outputs.head_ref}}
+          echo ${{steps.mergedCommitsSha.outputs.pr_number}}
+  Swap_slot:
+    name: Swap deploymet slot
+    runs-on: ubuntu-20.04
+    needs: Check
+    if: needs.Check.outputs.IS_MERGED_COMMIT == "true"
+    steps:
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: 'Env'
+        run: |
+          echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
+      - name: Swap slot
+        run: |
+          az functionapp deployment slot swap -g $RESOURCE_GROUP -n ${{functionsApp}} -s ${{needs.Check.outputs.SLOT_NAME}}
+      - name: Delete slot
+        run: az functionapp deployment slot delete -g $RESOURCE_GROUP -n ${{functionsApp}} -s ${{needs.Check.outputs.SLOT_NAME}}
+
   Build_frontend:
     name: Build frontend using Vue.
     runs-on: ubuntu-latest
+    needs: Check
+    if: needs.Check.outputs.IS_MERGED_COMMIT == "false"
     defaults:
       run:
         working-directory: Azure/Vue/weatherdisp
@@ -62,6 +125,8 @@ jobs:
   Build_runtime:
     name: Build functions.
     runs-on: ubuntu-latest
+    needs: Check
+    if: needs.Check.outputs.IS_MERGED_COMMIT == "false"
     defaults:
       run:
         working-directory: Azure/Functions/WeatherDisp
@@ -86,7 +151,8 @@ jobs:
   Build_and_publish_image:
     name: Build and publish image.
     runs-on: ubuntu-latest
-    needs: [Build_frontend, Build_runtime]
+    needs: [Check, Prepare, Build_frontend, Build_runtime]
+    if: needs.Check.outputs.IS_MERGED_COMMIT == "false"
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -100,9 +166,6 @@ jobs:
         with:
           name: functions
           path: images/artifacts
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: images
       - name: build image and push to github package registry
         uses: docker/build-push-action@v1
         with:
@@ -110,14 +173,15 @@ jobs:
           password: ${{ github.token }}
           repository: ${{ env.repository }}/${{ env.image }}
           registry: ${{ env.registry }}
-          tags: latest, ${{env.tag}}
+          tags: latest, ${{needs.Prepare.outputs.BRANCH}}-latest, ${{needs.Prepare.outputs.TAG_NAME}}
           tag_with_ref: true
           add_git_labels: true
           path: images
 
-  Deploy:
-    name: Deploy functions container
-    needs: [Build_and_publish_image]
+  DeployPush:
+    name: Deploy functions container from Push
+    needs: [Check, Prepare, Build_and_publish_image]
+    if: needs.Check.outputs.IS_MERGED_COMMIT == "false"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -133,35 +197,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: 'Deploy container'
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: Azure/functions-container-action@v1
         with:
           app-name: ${{ env.functionsApp }}
-          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
-      - name: 'Deploy staging container'
-        if: github.event_name == 'pull_request'
-        id: fa
-        uses: Azure/functions-container-action@v1
-        with:
-          app-name: ${{ env.functionsApp }}
-          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
-          slot-name: stage
-      - name: 'Deploy dev container'
-        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-        uses: Azure/functions-container-action@v1
-        with:
-          app-name: ${{ env.functionsApp }}
-          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{env.tag}}
-          slot-name: dev
-      - name: 'comment access url'
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v1
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: 'URL is ${{steps.fa.outputs.app-url}}/api/WeatherInfo'
-            })
+          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{needs.Prepare.outputs.TAG_NAME}}
