@@ -84,9 +84,9 @@ jobs:
           echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
       - name: Swap slot
         run: |
-          az functionapp deployment slot swap -g $RESOURCE_GROUP -n ${{functionsApp}} -s ${{needs.Check.outputs.SLOT_NAME}}
+          az functionapp deployment slot swap -g $RESOURCE_GROUP -n ${{env.functionsApp}} -s ${{needs.Check.outputs.SLOT_NAME}}
       - name: Delete slot
-        run: az functionapp deployment slot delete -g $RESOURCE_GROUP -n ${{functionsApp}} -s ${{needs.Check.outputs.SLOT_NAME}}
+        run: az functionapp deployment slot delete -g $RESOURCE_GROUP -n ${{env.functionsApp}} -s ${{needs.Check.outputs.SLOT_NAME}}
 
   Build_frontend:
     name: Build frontend using Vue.
