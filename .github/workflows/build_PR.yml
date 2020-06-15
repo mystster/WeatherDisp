@@ -35,7 +35,6 @@ jobs:
       SLOT_NAME: ${{github.event.number}}-${{steps.run.outputs.safeBranch}}
       BRANCH: ${{steps.run.outputs.safeBranch}}
       TAG_NAME: ${{steps.run.outputs.safeBranch}}-${{steps.run.outputs.stag}}
-      TEMP: ${{steps.temp.outputs.result}}
     env:
       HEAD_REF: ${{github.head_ref}}
       STAG: ${{github.event.pull_request.head.sha}}
@@ -44,18 +43,10 @@ jobs:
         run: |
           echo "::set-output name=safeBranch::${HEAD_REF//_/-}"
           echo "::set-output name=stag::${STAG::7}"
-      - id: temp
-        uses: actions/github-script@v2
-        with:
-          previews: groot
-          debug: true
-          script: |
-            return true;
   Create_Slot:
     name: Create Azure functions slot if PR opened
     runs-on: ubuntu-latest
     needs: Prepare
-    if: needs.Prepare.outputs.TEMP == 'true'
     steps:
       - name: 'Login via Azure CLI'
         if: github.event.action == 'opened'
