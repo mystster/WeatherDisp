@@ -41,7 +41,8 @@ jobs:
     steps:
       - id: run
         run: |
-          echo "::set-output name=safeBranch::${HEAD_REF//_/-}"
+          DATA=${HEAD_REF##*/}
+          echo "::set-output name=safeBranch::`echo $DATA | sed -E 's/[^a-zA-Z0-9\-]/\-/g'`"
           echo "::set-output name=stag::${STAG::7}"
   Create_Slot:
     name: Create Azure functions slot if PR opened
