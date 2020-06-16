@@ -1,0 +1,22 @@
+{
+  "timezone": "Asia/Tokyo",
+  "js": {
+    "packageRules": [
+      {
+        "packagePatterns": [
+          "*"
+        ],
+        "minor": {
+          "groupName": "all non-major dependencies",
+          "groupSlug": "all-minor-patch"
+        }
+      }
+    ]
+  },
+  "extends": [
+    "config:base",
+    "schedule:weekdays",
+    ":label(depedendencies)",
+    ":assignee(mystster)"
+  ]
+}
