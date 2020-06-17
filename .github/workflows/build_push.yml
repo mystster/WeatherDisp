@@ -59,7 +59,7 @@ jobs:
             if(pr){
               console.dir(pr);
               console.dir(pr.head);
-              core.setOutput("head_ref", pr.head.ref);
+              core.setOutput("head_ref", pr.head.ref.split('/').pop().replace(/[^a-zA-Z0-9]/g, '-'));
               core.setOutput("pr_number", pr.number);
               return true;
             }

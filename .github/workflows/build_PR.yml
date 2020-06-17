@@ -42,7 +42,7 @@ jobs:
       - id: run
         run: |
           DATA=${HEAD_REF##*/}
-          echo "::set-output name=safeBranch::`echo $DATA | sed -E 's/[^a-zA-Z0-9\-]/\-/g'`"
+          echo "::set-output name=safeBranch::`echo $DATA | sed -E 's/[^a-zA-Z0-9]/\-/g'`"
           echo "::set-output name=stag::${STAG::7}"
   Create_Slot:
     name: Create Azure functions slot if PR opened
@@ -50,16 +50,16 @@ jobs:
     needs: Prepare
     steps:
       - name: 'Login via Azure CLI'
-        if: github.event.action == 'opened'
+        if: github.event.action == 'opened' || github.event.action == 'reopened'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: 'Env'
-        if: github.event.action == 'opened'
+        if: github.event.action == 'opened' || github.event.action == 'reopened' 
         run: |
           echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
       - name: 'Create Azure functions slot'
-        if: github.event.action == 'opened'
+        if: github.event.action == 'opened' || github.event.action == 'reopened'
         run: |
           az functionapp deployment slot create --name ${{env.functionsApp}} --slot ${{needs.Prepare.outputs.SLOT_NAME}} --configuration-source stage --resource-group $RESOURCE_GROUP > /dev/null
           az functionapp config appsettings set --name ${{env.functionsApp}} --slot ${{needs.Prepare.outputs.SLOT_NAME}} --resource-group $RESOURCE_GROUP --settings "$(az functionapp config appsettings list --name ${{env.functionsApp}} --slot stage --resource-group $RESOURCE_GROUP  | jq '[.[] | select(.name=="DARKSKY_API" or .name=="LAG" or .name=="LAT" or .name=="MAX_EXEC")]')" > /dev/null
