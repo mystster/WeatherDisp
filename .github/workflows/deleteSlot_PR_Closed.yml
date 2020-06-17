@@ -28,7 +28,8 @@ jobs:
     steps:
       - id: run
         run: |
-          echo "::set-output name=safeBranch::${HEAD_REF//_/-}"
+          DATA=${HEAD_REF##*/}
+          echo "::set-output name=safeBranch::`echo $DATA | sed -E 's/[^a-zA-Z0-9\-]/\-/g'`"
   DeleteSlot:
     name: Delte slot
     runs-on: ubuntu-latest
