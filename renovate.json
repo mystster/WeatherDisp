@@ -1,5 +1,11 @@
 {
   "timezone": "Asia/Tokyo",
+  "minor": {
+    "label": "minor"
+  },
+  "major": {
+    "label": "major"
+  },
   "js": {
     "packageRules": [
       {
