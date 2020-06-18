@@ -1,11 +1,10 @@
 {
-  "timezone": "Asia/Tokyo",
   "masterIssue": true,
   "minor": {
-    "labels": ["minor"]
+    "labels": ["dependencies", "minor"]
   },
   "major": {
-    "labels": ["major"]
+    "labels": ["dependencies", "major"]
   },
   "js": {
     "packageRules": [
@@ -40,8 +39,8 @@
   "extends": [
     "config:base",
     "helpers:disableTypesNodeMajor",
+    ":timezone(Asia/Tokyo)",
     "schedule:weekdays",
-    ":label(dependencies)",
     ":assignee(mystster)",
     ":prConcurrentLimit10"
   ]
