@@ -22,7 +22,7 @@
   "extends": [
     "config:base",
     "schedule:weekdays",
-    ":label(depedendencies)",
+    ":label(dependencies)",
     ":assignee(mystster)"
   ]
 }
