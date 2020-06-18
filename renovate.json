@@ -38,8 +38,10 @@
   },
   "extends": [
     "config:base",
+    "helpers:disableTypesNodeMajor",
     "schedule:weekdays",
     ":label(dependencies)",
-    ":assignee(mystster)"
+    ":assignee(mystster)",
+    ":prConcurrentLimit10"
   ]
 }
