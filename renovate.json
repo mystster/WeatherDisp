@@ -1,10 +1,10 @@
 {
   "timezone": "Asia/Tokyo",
   "minor": {
-    "label": "minor"
+    "labels": ["minor"]
   },
   "major": {
-    "label": "major"
+    "labels": ["major"]
   },
   "js": {
     "packageRules": [
@@ -16,6 +16,23 @@
           "groupName": "all non-major dependencies",
           "groupSlug": "all-minor-patch"
         }
+      },
+      {
+        "groupName": "ESLint and Prettier",
+        "packageNames": [
+          "eslint",
+          "prettier"
+        ],
+        "packagePatterns": [
+          "^eslint-config-",
+          "^eslint-plugin-"
+        ]
+      },
+      {
+        "groupName": "Vue CLI",
+        "packagePatterns": [
+          "^@vue/"
+        ]
       }
     ]
   },
