@@ -1,5 +1,11 @@
 {
   "timezone": "Asia/Tokyo",
+  "minor": {
+    "labels": ["minor"]
+  },
+  "major": {
+    "labels": ["major"]
+  },
   "js": {
     "packageRules": [
       {
@@ -10,13 +16,32 @@
           "groupName": "all non-major dependencies",
           "groupSlug": "all-minor-patch"
         }
+      },
+      {
+        "groupName": "ESLint and Prettier",
+        "packageNames": [
+          "eslint",
+          "prettier"
+        ],
+        "packagePatterns": [
+          "^eslint-config-",
+          "^eslint-plugin-"
+        ]
+      },
+      {
+        "groupName": "Vue CLI",
+        "packagePatterns": [
+          "^@vue/"
+        ]
       }
     ]
   },
   "extends": [
     "config:base",
+    "helpers:disableTypesNodeMajor",
     "schedule:weekdays",
-    ":label(depedendencies)",
-    ":assignee(mystster)"
+    ":label(dependencies)",
+    ":assignee(mystster)",
+    ":prConcurrentLimit10"
   ]
 }
