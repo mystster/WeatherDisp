@@ -1,5 +1,6 @@
 {
   "timezone": "Asia/Tokyo",
+  "masterIssue": true,
   "minor": {
     "labels": ["minor"]
   },
