@@ -6,7 +6,7 @@ RUN cd /src/dotnet-function-app && \
     dotnet publish *.csproj --output /home/site/wwwroot && \
     cp /home/site/wwwroot/bin/runtimes/linux-x64/native/Magick.Native-Q8-x64.dll.so /home/site/wwwroot/bin/Magick.Native-Q8-x64.dll.so
 
-FROM node:13.10.1-alpine3.10 AS node-builder
+FROM node:13.14.0-alpine3.10 AS node-builder
 COPY Vue/weatherdisp/ /src
 RUN cd /src && \
 yarn install && \
