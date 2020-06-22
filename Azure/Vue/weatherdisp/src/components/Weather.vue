@@ -1,24 +1,28 @@
 <template>
   <div class="weather" id="weatherPane">
     <div id="dateAndIcon">
-      {{getLocalDateString(dailyWeather.time)}}<br />
+      {{ getLocalDateString(dailyWeather.time) }}<br />
       <skycon :condition="dailyWeather.icon"></skycon>
     </div>
-    <div id="temp">{{ Math.round(dailyWeather.temperatureMin) }}/{{ Math.round(dailyWeather.temperatureMax) }}℃</div>
+    <div id="temp">
+      {{ Math.round(dailyWeather.temperatureMin) }}/{{
+        Math.round(dailyWeather.temperatureMax)
+      }}℃
+    </div>
     <div id="rainy">
       {{ Math.round(dailyWeather.precipProbability * 10) * 10 }}%
     </div>
     <div id="wind">
-      {{direction}} {{ Math.round(dailyWeather.windSpeed) }}m/s
+      {{ direction }} {{ Math.round(dailyWeather.windSpeed) }}m/s
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
-import { DataPoint } from "darkskyapi-ts";
-import * as Util from "../util";
-import DateWithOffset from "date-with-offset"
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import { DataPoint } from 'darkskyapi-ts';
+import * as Util from '../util';
+import DateWithOffset from 'date-with-offset';
 
 @Component
 export default class Weather extends Vue {
@@ -27,13 +31,12 @@ export default class Weather extends Vue {
     return Util.derectionFromDegree(this.dailyWeather?.windBearing ?? 0);
   }
   getLocalDateString(tick: number): string {
-    const date = new DateWithOffset(tick*1000, 540);
-    return date.localDate().toLocaleDateString("ja-JP", {
-      month: "numeric",
-      day: "numeric"
+    const date = new DateWithOffset(tick * 1000, 540);
+    return date.localDate().toLocaleDateString('ja-JP', {
+      month: 'numeric',
+      day: 'numeric'
     });
   }
-
 }
 </script>
 
@@ -60,7 +63,7 @@ $marginsize: $fontsize * -0.3;
   grid-column: 1;
   grid-row: 1 / 3;
   margin-top: -3px;
-  canvas{
+  canvas {
     width: $iconsize;
     height: $iconsize;
   }
