@@ -16,17 +16,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import Weather from "./components/Weather.vue";
-import WeatherTable from "./components/WeatherTable.vue";
-import WeatherNow from "./components/WeatherNow.vue";
+import { Component, Vue } from 'vue-property-decorator';
+import Weather from './components/Weather.vue';
+import WeatherTable from './components/WeatherTable.vue';
+import WeatherNow from './components/WeatherNow.vue';
 import {
   DarkSkyOptions,
   Units,
   Language,
   DarkSky,
   Forecast
-} from "darkskyapi-ts";
+} from 'darkskyapi-ts';
 
 @Component({
   components: {
@@ -38,7 +38,7 @@ import {
 export default class App extends Vue {
   result: Forecast | false = false;
   async created() {
-    const KEY = process?.env?.VUE_APP_DARKSKY_KEY ?? "";
+    const KEY = process?.env?.VUE_APP_DARKSKY_KEY ?? '';
     const lat = process?.env?.VUE_APP_LAT ?? 0;
     const lng = process?.env?.VUE_APP_LAG ?? 0;
     // https://api.darksky.net/forecast/xxxxxxxx/1110,222
@@ -61,7 +61,7 @@ export default class App extends Vue {
 </script>
 
 <style>
-@import url("http://mplus-webfonts.sourceforge.jp/mplus_webfonts.css");
+@import url('http://mplus-webfonts.sourceforge.jp/mplus_webfonts.css');
 body,
 html {
   width: 100vw;
@@ -70,9 +70,9 @@ html {
 body {
   margin: 0;
   font-size: 12px;
-  font-family: "mplus-1p-bold", sans-serif;
+  font-family: 'mplus-1p-bold', sans-serif;
 }
-::-webkit-scrollbar{
+::-webkit-scrollbar {
   display: none;
 }
 </style>
@@ -101,5 +101,4 @@ body {
   grid-column: 1 / 3;
   grid-row: 3;
 }
-
 </style>
