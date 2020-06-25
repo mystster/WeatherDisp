@@ -10,7 +10,7 @@
       }}℃
     </div>
     <div id="rainy">
-      {{ Math.round(dailyWeather.precipProbability * 10) * 10 }}%
+      {{ hourlyPrecipProbability }}
     </div>
     <div id="wind">
       {{ direction }} {{ Math.round(dailyWeather.windSpeed) }}m/s
@@ -20,13 +20,19 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { DataPoint } from 'darkskyapi-ts';
+import { DataPoint, DataBlock } from 'darkskyapi-ts';
 import * as Util from '../util';
 import DateWithOffset from 'date-with-offset';
+
+type HourlyPrecipProbability = {
+  hour: number;
+  precip: number;
+};
 
 @Component
 export default class Weather extends Vue {
   @Prop() private dailyWeather?: DataPoint;
+  @Prop() private hourlyWeather?: DataBlock;
   get direction(): string {
     return Util.derectionFromDegree(this.dailyWeather?.windBearing ?? 0);
   }
@@ -36,6 +42,38 @@ export default class Weather extends Vue {
       month: 'numeric',
       day: 'numeric'
     });
+  }
+  get hourlyPrecipProbability(): string {
+    if (!this.hourlyWeather || !this.dailyWeather) {
+      return '';
+    }
+    const todayHourlyPrecipProbability: HourlyPrecipProbability[] = this.hourlyWeather.data
+      .filter(
+        x =>
+          x.time >= (this.dailyWeather?.time ?? 0) &&
+          x.time < (this.dailyWeather?.time ?? 0) + 24 * 60 * 60
+      )
+      .map(x => {
+        const d = new DateWithOffset(x.time * 1000, 540);
+        return {
+          hour: d.localDate().getHours(),
+          precip: Math.round((x?.precipProbability ?? 0) * 10) * 10
+        };
+      });
+    console.dir(todayHourlyPrecipProbability);
+    return `${todayHourlyPrecipProbability
+      .filter(x => x.hour >= 7 && x.hour < 12)
+      .reduce(
+        (prev, cur) => Math.max(prev, cur.precip),
+        0
+      )}/${todayHourlyPrecipProbability
+      .filter(x => x.hour >= 12 && x.hour < 17)
+      .reduce(
+        (prev, cur) => Math.max(prev, cur.precip),
+        0
+      )}/${todayHourlyPrecipProbability
+      .filter(x => x.hour >= 17 && x.hour < 21)
+      .reduce((prev, cur) => Math.max(prev, cur.precip), 0)}`;
   }
 }
 </script>
