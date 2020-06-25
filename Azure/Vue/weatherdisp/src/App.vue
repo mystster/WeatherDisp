@@ -1,10 +1,16 @@
 <template>
   <div id="app" v-if="result">
     <div id="weatherToday">
-      <Weather :dailyWeather="result.daily.data[0]" />
+      <Weather
+        :dailyWeather="result.daily.data[0]"
+        :hourlyWeather="result.hourly"
+      />
     </div>
     <div id="weatherTommorow">
-      <Weather :dailyWeather="result.daily.data[1]" />
+      <Weather
+        :dailyWeather="result.daily.data[1]"
+        :hourlyWeather="result.hourly"
+      />
     </div>
     <div id="weatherTable">
       <Weather-Table :hourlyWeather="result.hourly" />
