@@ -60,20 +60,27 @@ export default class Weather extends Vue {
           precip: Math.round((x?.precipProbability ?? 0) * 10) * 10
         };
       });
+
+    const maxPrecipProbability = (
+      startHour: number,
+      endHour: number
+    ): string | number =>
+      todayHourlyPrecipProbability
+        .filter(x => x.hour >= startHour && x.hour < endHour)
+        .reduce((prev: string | number, cur: HourlyPrecipProbability):
+          | string
+          | number => {
+          if (typeof prev === 'string') {
+            return cur.precip;
+          } else {
+            return Math.max(prev, cur.precip);
+          }
+        }, '-');
     console.dir(todayHourlyPrecipProbability);
-    return `${todayHourlyPrecipProbability
-      .filter(x => x.hour >= 7 && x.hour < 12)
-      .reduce(
-        (prev, cur) => Math.max(prev, cur.precip),
-        0
-      )}/${todayHourlyPrecipProbability
-      .filter(x => x.hour >= 12 && x.hour < 17)
-      .reduce(
-        (prev, cur) => Math.max(prev, cur.precip),
-        0
-      )}/${todayHourlyPrecipProbability
-      .filter(x => x.hour >= 17 && x.hour < 21)
-      .reduce((prev, cur) => Math.max(prev, cur.precip), 0)}`;
+    return `${maxPrecipProbability(7, 12)}/${maxPrecipProbability(
+      12,
+      17
+    )}/${maxPrecipProbability(17, 21)}`;
   }
 }
 </script>
