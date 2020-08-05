@@ -34,7 +34,7 @@
     "html-webpack-inline-source-plugin": "0.0.10",
     "prettier": "2.0.5",
     "sass": "1.26.9",
-    "sass-loader": "8.0.2",
+    "sass-loader": "9.0.3",
     "string-replace-loader": "2.3.0",
     "typescript": "3.9.5",
     "vue-template-compiler": "2.6.11"
