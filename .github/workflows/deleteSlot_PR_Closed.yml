@@ -42,7 +42,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: 'Env'
         run: |
-          echo ::set-env name=RESOURCE_GROUP::`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'`
+          echo RESOURCE_GROUP=`az functionapp list | jq -r '.[] | select(.name =="${{env.functionsApp}}") | .resourceGroup'` >> $GITHUB_ENV
       - name: delte slot
         run: |
           az functionapp deployment slot delete --name ${{env.functionsApp}} --slot ${{needs.Prepare.outputs.SLOT_NAME}} --resource-group $RESOURCE_GROUP > /dev/null
