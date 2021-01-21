@@ -170,7 +170,7 @@ jobs:
         uses: docker/build-push-action@v1
         with:
           username: ${{ github.actor }}
-          password: ${{ github.token }}
+          password: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ env.repository }}/${{ env.image }}
           registry: ${{ env.registry }}
           tags: latest, ${{needs.Prepare.outputs.BRANCH}}-latest, ${{needs.Prepare.outputs.TAG_NAME}}
@@ -191,7 +191,7 @@ jobs:
         with:
           login-server: ${{ env.registry }}
           username: ${{ github.actor }}
-          password: ${{ github.token }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
         with:

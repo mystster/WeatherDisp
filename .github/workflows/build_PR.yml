@@ -26,7 +26,7 @@ jobs:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.4.0
         with:
-          access_token: ${{ github.token }}
+          access_token: ${{ secrets.GITHUB_TOKEN }}
 
   Prepare:
     name: Prepare environment variable
@@ -140,7 +140,7 @@ jobs:
         uses: docker/build-push-action@v1
         with:
           username: ${{ github.actor }}
-          password: ${{ github.token }}
+          password: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ env.repository }}/${{ env.image }}
           registry: ${{ env.registry }}
           tags: latest, ${{needs.Prepare.outputs.BRANCH}}-latest, ${{needs.Prepare.outputs.TAG_NAME}}
@@ -160,7 +160,7 @@ jobs:
         with:
           login-server: ${{ env.registry }}
           username: ${{ github.actor }}
-          password: ${{ github.token }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
         with:
