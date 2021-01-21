@@ -403,3 +403,6 @@ MigrationBackup/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+Arduino/build/
+.actrc
+act/
