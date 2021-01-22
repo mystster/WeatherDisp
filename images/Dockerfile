@@ -16,7 +16,7 @@ RUN apt-get update \
     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
     && apt-get update \
-    && apt-get install -y google-chrome fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
+    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
     --no-install-recommends \
     && apt-get autoremove -y \
     && apt-get clean -y \
@@ -24,6 +24,6 @@ RUN apt-get update \
 
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-unstable
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 COPY  ["./artifacts", "/home/site/wwwroot"]
