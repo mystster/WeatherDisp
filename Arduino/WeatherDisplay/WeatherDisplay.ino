@@ -78,13 +78,13 @@ void loop()
   // Serial.printf("Now: %02d/%02d %02d:%02d:%02d\n", tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
   uint32_t now = millis();
 
-  if (now - lastExecDate.getWeatherInfoJpeg > getWeatherInfoPeriod)
+  if (lastExecDate.getWeatherInfoJpeg == 0 || now - lastExecDate.getWeatherInfoJpeg > getWeatherInfoPeriod)
   {
     Serial.println("getWeatherInfoJpeg()");
     getWeatherInfoJpeg();
     lastExecDate.getWeatherInfoJpeg = now;
   }
-  if (now - lastExecDate.getCurrentTemp > getCurrentTempPeriod)
+  if (lastExecDate.getCurrentTemp == 0 || now - lastExecDate.getCurrentTemp > getCurrentTempPeriod)
   {
     //TODO: 現在の気温を取得する
     Serial.println("getCurrentTemp()");
