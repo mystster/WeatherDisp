@@ -78,6 +78,12 @@ void loop()
   // Serial.printf("Now: %02d/%02d %02d:%02d:%02d\n", tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
   uint32_t now = millis();
 
+  if(now < lastExecDate.getCurrentTemp || now < lastExecDate.getWeatherInfoJpeg ){
+    // millis()がオーバーフローしたら
+    lastExecDate.getCurrentTemp = 0;
+    lastExecDate.getWeatherInfoJpeg = 0;
+  }
+
   if (lastExecDate.getWeatherInfoJpeg == 0 || now - lastExecDate.getWeatherInfoJpeg > getWeatherInfoPeriod)
   {
     Serial.println("getWeatherInfoJpeg()");
