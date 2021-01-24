@@ -26,13 +26,12 @@ GxEPD_Class display(io, /*RST=D4*/ D4, /*BUSY=D2*/ D2);        // default select
 HTTPClient client;
 BearSSL::WiFiClientSecure secure;
 
-const int32_t getWeatherInfoPeriod = 10 * 60;
-const int32_t getCurrentTempPeriod = 10 * 60;
-const int16_t marginSleepTime = 30;
+const uint32_t getWeatherInfoPeriod = 10 * 60 * 1000;
+const uint32_t getCurrentTempPeriod = 10 * 60 * 1000;
 
 struct {
-  time_t getWeatherInfoJpeg;
-  time_t getCurrentTemp;
+  uint64_t getWeatherInfoJpeg;
+  uint64_t getCurrentTemp;
 } lastExecDate;
 
 
@@ -57,51 +56,50 @@ void setup()
   Serial.println(WiFi.localIP());
   secure.setInsecure();
 
-  Serial.print("Time syncing");
-  configTzTime("JST-9", "ntp.nict.jp", "ntp.jst.mfeed.ad.jp");
-  while (time(NULL) <= 100000){
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("done");
+  // Serial.print("Time syncing");
+  // configTzTime("JST-9", "ntp.nict.jp", "ntp.jst.mfeed.ad.jp");
+  // while (time(NULL) <= 100000){
+  //   delay(500);
+  //   Serial.print(".");
+  // }
+  // Serial.println("done");
 
-  Serial.println("determine wake reason");
-  if (ESP.getResetReason() == "Deep-Sleep Wake"){
-    Serial.println("wakeup from deepSleep. restore data from RTC memory");
-    ESP.rtcUserMemoryRead(USER_DATA_ADDR, (uint32_t *)&lastExecDate, sizeof(lastExecDate));
-  }else{
-    Serial.println("normal wakeup. Init data");
+  Serial.println("Init data");
+  lastExecDate.getCurrentTemp = 0;
+  lastExecDate.getWeatherInfoJpeg = 0;
+
+  Serial.println("setup done");
+}
+
+void loop()
+{
+  // time_t now = time(NULL);
+  // tm *tm = localtime(&now);
+  // Serial.printf("Now: %02d/%02d %02d:%02d:%02d\n", tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+  uint32_t now = millis();
+
+  if(now < lastExecDate.getCurrentTemp || now < lastExecDate.getWeatherInfoJpeg ){
+    // millis()がオーバーフローしたら
     lastExecDate.getCurrentTemp = 0;
     lastExecDate.getWeatherInfoJpeg = 0;
   }
 
-  time_t now = time(NULL);
-  tm* tm = localtime(&now);
-  Serial.printf("Now: %02d/%02d %02d:%02d:%02d\n", tm->tm_mon+1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
-
-  Serial.println("setup done");
-
-  if(now - lastExecDate.getWeatherInfoJpeg > getWeatherInfoPeriod - marginSleepTime){
+  if (lastExecDate.getWeatherInfoJpeg == 0 || now - lastExecDate.getWeatherInfoJpeg > getWeatherInfoPeriod)
+  {
     Serial.println("getWeatherInfoJpeg()");
     getWeatherInfoJpeg();
     lastExecDate.getWeatherInfoJpeg = now;
   }
-  if(now - lastExecDate.getCurrentTemp > getCurrentTempPeriod - marginSleepTime){
+  if (lastExecDate.getCurrentTemp == 0 || now - lastExecDate.getCurrentTemp > getCurrentTempPeriod)
+  {
     //TODO: 現在の気温を取得する
     Serial.println("getCurrentTemp()");
     lastExecDate.getCurrentTemp = now;
   }
   // 最終実行日時を保存
-  ESP.rtcUserMemoryWrite(USER_DATA_ADDR, (uint32_t *)&lastExecDate, sizeof(lastExecDate));
+  // ESP.rtcUserMemoryWrite(USER_DATA_ADDR, (uint32_t *)&lastExecDate, sizeof(lastExecDate));
 
-  int32_t sleepTimeSec = min(lastExecDate.getWeatherInfoJpeg + getWeatherInfoPeriod, lastExecDate.getCurrentTemp + getCurrentTempPeriod) - now;
-  Serial.printf("deep sleep %d seconds!\n", sleepTimeSec);
-  ESP.deepSleep(sleepTimeSec * 1000000 / 0.95, RF_DEFAULT);
-}
-
-void loop()
-{
-  delay(1000);
+  // delay(1000);
 }
 
 void getWeatherInfoJpeg(){
