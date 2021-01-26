@@ -11,12 +11,8 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 
-#include <time.h>
 // Please enter your sensitive data in the Secret tab or arduino_secrets.h(SECRET_xxxx defines)
 #include "arduino_secret.h"
-
-#define JST 9*3600
-#define USER_DATA_ADDR  66
 
 // for SPI pin definitions see e.g.:
 // C:\Users\xxx\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\2.4.2\variants\generic\common.h
@@ -56,14 +52,6 @@ void setup()
   Serial.println(WiFi.localIP());
   secure.setInsecure();
 
-  // Serial.print("Time syncing");
-  // configTzTime("JST-9", "ntp.nict.jp", "ntp.jst.mfeed.ad.jp");
-  // while (time(NULL) <= 100000){
-  //   delay(500);
-  //   Serial.print(".");
-  // }
-  // Serial.println("done");
-
   Serial.println("Init data");
   lastExecDate.getCurrentTemp = 0;
   lastExecDate.getWeatherInfoJpeg = 0;
@@ -73,9 +61,6 @@ void setup()
 
 void loop()
 {
-  // time_t now = time(NULL);
-  // tm *tm = localtime(&now);
-  // Serial.printf("Now: %02d/%02d %02d:%02d:%02d\n", tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
   uint32_t now = millis();
 
   if(now < lastExecDate.getCurrentTemp || now < lastExecDate.getWeatherInfoJpeg ){
@@ -96,10 +81,6 @@ void loop()
     Serial.println("getCurrentTemp()");
     lastExecDate.getCurrentTemp = now;
   }
-  // 最終実行日時を保存
-  // ESP.rtcUserMemoryWrite(USER_DATA_ADDR, (uint32_t *)&lastExecDate, sizeof(lastExecDate));
-
-  // delay(1000);
 }
 
 void getWeatherInfoJpeg(){
