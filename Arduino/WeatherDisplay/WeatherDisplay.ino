@@ -22,13 +22,13 @@
 #define DHTTYPE DHT22 // DHT 22 (AM2302)
 //#define DHTTYPE    DHT21     // DHT 21 (AM2301)
 
-#define DHTPIN D1
+#define DHTPIN D3
 
 // for SPI pin definitions see e.g.:
 // C:\Users\xxx\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\2.4.2\variants\generic\common.h
 
-GxIO_Class io(SPI, /*CS=D8*/ D8, /*DC=D3*/ D3, /*RST=D4*/ D4); // arbitrary selection of D3(=0), D4(=2), selected for default of GxEPD_Class
-GxEPD_Class display(io, /*RST=D4*/ D4, /*BUSY=D2*/ D2);        // default selection of D4(=2), D2(=4)
+GxIO_Class io(SPI, /*CS=D8*/ D8, /*DC=D3*/ D4, /*RST=D4*/ D2); // arbitrary selection of D3(=0), D4(=2), selected for default of GxEPD_Class
+GxEPD_Class display(io, /*RST=D4*/ D2, /*BUSY=D2*/ D1);        // default selection of D4(=2), D2(=4)
 HTTPClient client;
 BearSSL::WiFiClientSecure secure;
 Ambient ambient;
@@ -49,7 +49,6 @@ void setup()
   Serial.begin(74880);
   Serial.println();
   Serial.println("setup");
-
   display.init(74880); // enable diagnostic output on Serial
 
   WiFi.begin(SECRET_SSID, SECRET_SSID_PASSWORD);
@@ -93,7 +92,6 @@ void loop()
   }
   if (lastExecDate.getCurrentTemp == 0 || now - lastExecDate.getCurrentTemp > getCurrentTempPeriod)
   {
-    //TODO: 現在の気温を取得する
     Serial.println("getCurrentTemp()");
     getCurrentTemp();
     lastExecDate.getCurrentTemp = now;
