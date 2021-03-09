@@ -63,6 +63,36 @@ namespace WeatherDisp
                 DumpIO = true
             });
             using var page = await browser.NewPageAsync();
+            page.Console += (target, e) => {
+                switch (e.Message.Type)
+                {
+                    case ConsoleType.Error:
+                        log.LogError(e.Message.Text);
+                        break;
+                    case ConsoleType.Warning:
+                        log.LogWarning(e.Message.Text);
+                        break;
+                    default:
+                        log.LogInformation($"{e.Message.Type}F{e.Message.Text}");
+                        break;
+                }
+            };
+            page.Error += (target, e) =>
+            {
+                log.LogError(e.Error);
+            };
+            page.PageError += (target, e) =>
+            {
+                log.LogError(e.Message);
+            };
+            page.Response += (target, e) =>
+            {
+                log.LogInformation($"{e.Response.Status}:{e.Response.StatusText}");
+            };
+            page.RequestFailed += (target, e) =>
+            {
+                log.LogError($"{e.Request.Failure}");
+            };
             await page.SetViewportAsync(new ViewPortOptions()
             {
                 Width = 298,
@@ -95,6 +125,11 @@ namespace WeatherDisp
                 });
             im.Quality = 100;
             return File(im.ToByteArray(MagickFormat.Jpg), "image/jpeg");
+        }
+
+        private void Page_Console(object sender, ConsoleEventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 
