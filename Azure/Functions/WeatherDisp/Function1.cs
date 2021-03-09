@@ -59,7 +59,8 @@ namespace WeatherDisp
                 {
                     "--no-sandbox",
                     "--disable-web-security"
-                }
+                },
+                DumpIO = true
             }))
             {
                 using var page = await browser.NewPageAsync();
