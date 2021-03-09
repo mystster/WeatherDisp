@@ -11,23 +11,32 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 
-#include <time.h>
+#include <Ambient.h>
+#include <DHT.h>
+
 // Please enter your sensitive data in the Secret tab or arduino_secrets.h(SECRET_xxxx defines)
 #include "arduino_secret.h"
 
-#define JST 9*3600
-#define USER_DATA_ADDR  66
+// Uncomment the type of sensor in use:
+//#define DHTTYPE    DHT11     // DHT 11
+#define DHTTYPE DHT22 // DHT 22 (AM2302)
+//#define DHTTYPE    DHT21     // DHT 21 (AM2301)
+
+#define DHTPIN D3
 
 // for SPI pin definitions see e.g.:
 // C:\Users\xxx\AppData\Local\Arduino15\packages\esp8266\hardware\esp8266\2.4.2\variants\generic\common.h
 
-GxIO_Class io(SPI, /*CS=D8*/ D8, /*DC=D3*/ D3, /*RST=D4*/ D4); // arbitrary selection of D3(=0), D4(=2), selected for default of GxEPD_Class
-GxEPD_Class display(io, /*RST=D4*/ D4, /*BUSY=D2*/ D2);        // default selection of D4(=2), D2(=4)
+GxIO_Class io(SPI, /*CS=D8*/ D8, /*DC=D3*/ D4, /*RST=D4*/ D2); // arbitrary selection of D3(=0), D4(=2), selected for default of GxEPD_Class
+GxEPD_Class display(io, /*RST=D4*/ D2, /*BUSY=D2*/ D1);        // default selection of D4(=2), D2(=4)
 HTTPClient client;
 BearSSL::WiFiClientSecure secure;
+Ambient ambient;
+WiFiClient ambientClient;
+DHT dht(DHTPIN, DHTTYPE);
 
 const uint32_t getWeatherInfoPeriod = 10 * 60 * 1000;
-const uint32_t getCurrentTempPeriod = 10 * 60 * 1000;
+const uint32_t getCurrentTempPeriod = 1 * 60 * 1000;
 
 struct {
   uint64_t getWeatherInfoJpeg;
@@ -40,7 +49,6 @@ void setup()
   Serial.begin(74880);
   Serial.println();
   Serial.println("setup");
-
   display.init(74880); // enable diagnostic output on Serial
 
   WiFi.begin(SECRET_SSID, SECRET_SSID_PASSWORD);
@@ -56,13 +64,8 @@ void setup()
   Serial.println(WiFi.localIP());
   secure.setInsecure();
 
-  // Serial.print("Time syncing");
-  // configTzTime("JST-9", "ntp.nict.jp", "ntp.jst.mfeed.ad.jp");
-  // while (time(NULL) <= 100000){
-  //   delay(500);
-  //   Serial.print(".");
-  // }
-  // Serial.println("done");
+  ambient.begin(SECRET_AMBIENT_CHANNEL, SECRET_AMBIENT_WRITE, &ambientClient);
+  dht.begin();
 
   Serial.println("Init data");
   lastExecDate.getCurrentTemp = 0;
@@ -73,9 +76,6 @@ void setup()
 
 void loop()
 {
-  // time_t now = time(NULL);
-  // tm *tm = localtime(&now);
-  // Serial.printf("Now: %02d/%02d %02d:%02d:%02d\n", tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
   uint32_t now = millis();
 
   if(now < lastExecDate.getCurrentTemp || now < lastExecDate.getWeatherInfoJpeg ){
@@ -92,14 +92,10 @@ void loop()
   }
   if (lastExecDate.getCurrentTemp == 0 || now - lastExecDate.getCurrentTemp > getCurrentTempPeriod)
   {
-    //TODO: 現在の気温を取得する
     Serial.println("getCurrentTemp()");
+    getCurrentTemp();
     lastExecDate.getCurrentTemp = now;
   }
-  // 最終実行日時を保存
-  // ESP.rtcUserMemoryWrite(USER_DATA_ADDR, (uint32_t *)&lastExecDate, sizeof(lastExecDate));
-
-  // delay(1000);
 }
 
 void getWeatherInfoJpeg(){
@@ -131,4 +127,16 @@ httpaccess:
     delay(1000 * 10);
     goto httpaccess;
   }
+}
+
+void getCurrentTemp()
+{
+  float t = dht.readTemperature();
+  float h = dht.readHumidity();
+
+  Serial.printf("temp:%f, humi:%f\n", t, h);
+
+  ambient.set(1, t);
+  ambient.set(2, h);
+  ambient.send();
 }
