@@ -67,31 +67,31 @@ namespace WeatherDisp
                 switch (e.Message.Type)
                 {
                     case ConsoleType.Error:
-                        log.LogError(e.Message.Text);
+                        log.LogError($"ConsoleError:{e.Message.Text}");
                         break;
                     case ConsoleType.Warning:
-                        log.LogWarning(e.Message.Text);
+                        log.LogWarning($"ConsoleWarning:{e.Message.Text}");
                         break;
                     default:
-                        log.LogInformation($"{e.Message.Type}F{e.Message.Text}");
+                        log.LogInformation($"Console{e.Message.Type}:{e.Message.Text}");
                         break;
                 }
             };
             page.Error += (target, e) =>
             {
-                log.LogError(e.Error);
+                log.LogError($"Error:{e.Error}");
             };
             page.PageError += (target, e) =>
             {
-                log.LogError(e.Message);
+                log.LogError($"PageError:{e.Message}");
             };
             page.Response += (target, e) =>
             {
-                log.LogInformation($"{e.Response.Status}:{e.Response.StatusText}");
+                log.LogInformation($"Response:{e.Response.Status}:{e.Response.StatusText}");
             };
             page.RequestFailed += (target, e) =>
             {
-                log.LogError($"{e.Request.Failure}");
+                log.LogError($"RequestFailed:{e.Request.Failure}");
             };
             await page.SetViewportAsync(new ViewPortOptions()
             {
