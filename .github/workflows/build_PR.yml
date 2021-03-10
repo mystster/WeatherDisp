@@ -61,7 +61,7 @@ jobs:
       - name: 'Create Azure functions slot'
         if: github.event.action == 'opened' || github.event.action == 'reopened'
         run: |
-          az functionapp deployment slot create --name ${{env.functionsApp}} --slot ${{needs.Prepare.outputs.SLOT_NAME}} --configuration-source stage --resource-group $RESOURCE_GROUP > /dev/null
+          az functionapp deployment slot create --name ${{env.functionsApp}} --slot ${{needs.Prepare.outputs.SLOT_NAME}} --configuration-source ${{env.functionsApp}} --resource-group $RESOURCE_GROUP > /dev/null
   Build_frontend:
     name: Build frontend using Vue.
     runs-on: ubuntu-latest
