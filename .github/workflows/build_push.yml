@@ -14,8 +14,7 @@ on:
 env:
   node-version: 13.10.1
   dotnet: 3.1.100
-  registry: docker.pkg.github.com
-  repository: mystster/weatherdisp
+  registry: ghcr.io
   image: weatherdisp
   functionsApp: WeatherInfo
 
@@ -166,12 +165,12 @@ jobs:
         with:
           name: functions
           path: images/artifacts
-      - name: build image and push to github package registry
+      - name: build image and push to GitHub Container Registry
         uses: docker/build-push-action@v1
         with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ env.repository }}/${{ env.image }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+          repository: ${{ github.repository_owner }}/${{ env.image }}
           registry: ${{ env.registry }}
           tags: latest, ${{needs.Prepare.outputs.BRANCH}}-latest, ${{needs.Prepare.outputs.TAG_NAME}}
           tag_with_ref: true
@@ -186,12 +185,12 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: Github package repositry login
+      - name: GitHub Container Registry login
         uses: azure/docker-login@v1
         with:
           login-server: ${{ env.registry }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
         with:
@@ -200,4 +199,4 @@ jobs:
         uses: Azure/functions-container-action@v1
         with:
           app-name: ${{ env.functionsApp }}
-          image: ${{ env.registry }}/${{ env.repository }}/${{ env.image }}:${{needs.Prepare.outputs.TAG_NAME}}
+          image: ${{ env.registry }}/${{ github.repository_owner }}/${{ env.image }}:${{needs.Prepare.outputs.TAG_NAME}}
