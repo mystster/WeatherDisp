@@ -150,7 +150,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          context: images
+          context: ./images
           tags: |
             ${{ github.repository_owner }}/${{ env.image }}:latest
             ${{ github.repository_owner }}/${{ env.image }}:${{needs.Prepare.outputs.BRANCH}}-latest
