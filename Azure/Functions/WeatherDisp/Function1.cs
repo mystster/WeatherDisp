@@ -35,13 +35,20 @@ namespace WeatherDisp
                 return BadRequest();
             }
 
-            if (int.TryParse(Environment.GetEnvironmentVariable("MAX_EXEC", EnvironmentVariableTarget.Process), out int maxCount)
-                && maxCount > 0
-                && execCounter <= maxCount)
+            var slotName = Environment.GetEnvironmentVariable("WEBSITE_SLOT_NAME", EnvironmentVariableTarget.Process);
+            log.LogInformation($"SlotName:{slotName}");
+
+            if(slotName != "Production")
             {
-                model.DarkskyKey = Environment.GetEnvironmentVariable("DARKSKY_API", EnvironmentVariableTarget.Process) ?? model.DarkskyKey;
-                model.Lag = Environment.GetEnvironmentVariable("LAG", EnvironmentVariableTarget.Process) ?? model.Lag;
-                model.Lat = Environment.GetEnvironmentVariable("LAT", EnvironmentVariableTarget.Process) ?? model.Lat;
+                // Slotの設定がある場合は、PR用と想定し、環境変数から情報を収集する
+                if (int.TryParse(Environment.GetEnvironmentVariable("MAX_EXEC", EnvironmentVariableTarget.Process), out int maxCount)
+                    && maxCount > 0
+                    && execCounter <= maxCount)
+                {
+                    model.DarkskyKey = Environment.GetEnvironmentVariable("DARKSKY_API", EnvironmentVariableTarget.Process) ?? model.DarkskyKey;
+                    model.Lag = Environment.GetEnvironmentVariable("LAG", EnvironmentVariableTarget.Process) ?? model.Lag;
+                    model.Lat = Environment.GetEnvironmentVariable("LAT", EnvironmentVariableTarget.Process) ?? model.Lat;
+                }
             }
 
             if (!TryValidateModel(model))
