@@ -150,11 +150,11 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          context: ./images
+          context: images
           tags: |
-            ${{ github.repository_owner }}/${{ env.image }}:latest
-            ${{ github.repository_owner }}/${{ env.image }}:${{needs.Prepare.outputs.BRANCH}}-latest
-            ${{ github.repository_owner }}/${{ env.image }}:${{needs.Prepare.outputs.TAG_NAME}}
+            ${{ env.registry }}/${{ github.repository_owner }}/${{ env.image }}:latest
+            ${{ env.registry }}/${{ github.repository_owner }}/${{ env.image }}:${{needs.Prepare.outputs.BRANCH}}-latest
+            ${{ env.registry }}/${{ github.repository_owner }}/${{ env.image }}:${{needs.Prepare.outputs.TAG_NAME}}
           labels: |
             org.opencontainers.image.source=${{ github.event.repository.html_url }}
             org.opencontainers.image.created=${{ steps.prep.outputs.created }}
