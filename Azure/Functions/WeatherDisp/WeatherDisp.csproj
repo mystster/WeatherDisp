@@ -14,7 +14,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.11" />
-    <PackageReference Include="PuppeteerSharp" Version="2.0.4" />
+    <PackageReference Include="PuppeteerSharp" Version="3.0.0" />
     <PackageReference Include="WebJobs.Extensions.HttpApi" Version="1.1.0" />
   </ItemGroup>
   <ItemGroup>
