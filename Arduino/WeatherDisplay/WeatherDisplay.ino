@@ -4,6 +4,7 @@
 // include library, include base class, make path known
 #include <GxEPD.h>
 #include <GxGDEW029T5/GxGDEW029T5.h> // 2.9" b/w IL0373
+#include <Fonts/FreeMonoBold9pt7b.h>
 
 #include <GxIO/GxIO_SPI/GxIO_SPI.h>
 #include <GxIO/GxIO.h>
@@ -37,10 +38,12 @@ DHT dht(DHTPIN, DHTTYPE);
 
 const uint32_t getWeatherInfoPeriod = 10 * 60 * 1000;
 const uint32_t getCurrentTempPeriod = 1 * 60 * 1000;
+const uint32_t writeCurrentTempPeriod = 5 * 60 * 1000;
 
 struct {
   uint64_t getWeatherInfoJpeg;
   uint64_t getCurrentTemp;
+  uint64_t writeCurrentTemp;
 } lastExecDate;
 
 
@@ -50,6 +53,8 @@ void setup()
   Serial.println();
   Serial.println("setup");
   display.init(74880); // enable diagnostic output on Serial
+  display.setFont(&FreeMonoBold9pt7b);
+  display.setTextColor(GxEPD_BLACK);
 
   WiFi.begin(SECRET_SSID, SECRET_SSID_PASSWORD);
 
@@ -89,12 +94,21 @@ void loop()
     Serial.println("getWeatherInfoJpeg()");
     getWeatherInfoJpeg();
     lastExecDate.getWeatherInfoJpeg = now;
+    Serial.println("writeCurrentTemp()");
+    writeCurrentTemp();
+    lastExecDate.writeCurrentTemp = now;
   }
   if (lastExecDate.getCurrentTemp == 0 || now - lastExecDate.getCurrentTemp > getCurrentTempPeriod)
   {
     Serial.println("getCurrentTemp()");
     getCurrentTemp();
     lastExecDate.getCurrentTemp = now;
+  }
+  if (lastExecDate.writeCurrentTemp == 0 || now - lastExecDate.writeCurrentTemp > writeCurrentTempPeriod)
+  {
+    Serial.println("writeCurrentTemp()");
+    writeCurrentTemp();
+    lastExecDate.writeCurrentTemp = now;
   }
 }
 
@@ -139,4 +153,22 @@ void getCurrentTemp()
   ambient.set(1, t);
   ambient.set(2, h);
   ambient.send();
+}
+
+void writeCurrentTemp() {
+    int posX = 180;
+    int posY = 124;
+    int boxW = 100;
+    int boxH = 20;
+
+    float t = dht.readTemperature();
+    float h = dht.readHumidity();
+    Serial.printf("temp:%.1f, humi:%.1f\n", t, h);
+
+    display.setRotation(3);
+    display.setCursor(posX, posY);
+    display.fillRect(posX, posY - boxH , boxW, boxH + 2, GxEPD_WHITE);
+    display.printf("%.1fC/%.0f%%", t, h);
+    display.updateWindow(posX, posY - boxH, boxW, boxH + 2, true);
+    display.powerDown();
 }
