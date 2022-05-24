@@ -1,5 +1,5 @@
 {
-  "enabled": false,
+  "enabled": true,
   "masterIssue": true,
   "minor": {
     "labels": ["dependencies", "minor"]
