@@ -2,6 +2,8 @@
   "profiles": {
     "WeatherDisp": {
       "commandName": "Project",
+      "commandLineArgs": "--port 7033",
+      "launchBrowser": false,
       "environmentVariables": {
         "PUPPETEER_EXECUTABLE_PATH": "C:\\Program Files (x86)\\Google\\Chrome Beta\\Application\\chrome.exe"
       }

@@ -7,11 +7,10 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using PuppeteerSharp;
-using Microsoft.Extensions.Hosting;
-using ImageMagick;
 using Azure.WebJobs.Extensions.HttpApi;
 using System.ComponentModel.DataAnnotations;
+using PuppeteerSharp;
+using ImageMagick;
 
 namespace WeatherDisp
 {
@@ -30,7 +29,7 @@ namespace WeatherDisp
             execCounter++;
             log.LogInformation($"WeatherInfo triggerd, count:{execCounter}");
 
-            if(model == null || context == null)
+            if (model == null || context == null)
             {
                 return BadRequest();
             }
@@ -38,7 +37,7 @@ namespace WeatherDisp
             var slotName = Environment.GetEnvironmentVariable("WEBSITE_SLOT_NAME", EnvironmentVariableTarget.Process);
             log.LogInformation($"SlotName:{slotName}");
 
-            if(slotName != "Production")
+            if (slotName != "Production")
             {
                 // Slotの設定がある場合は、PR用と想定し、環境変数から情報を収集する
                 if (int.TryParse(Environment.GetEnvironmentVariable("MAX_EXEC", EnvironmentVariableTarget.Process), out int maxCount)
