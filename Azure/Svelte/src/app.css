@@ -1,0 +1,17 @@
+@import url('http://mplus-webfonts.sourceforge.jp/mplus_webfonts.css');
+
+body,
+html {
+  width: 100vw;
+  height: 100vh;
+}
+
+body {
+  margin: 0;
+  font-size: 12px;
+  font-family: 'mplus-1p-bold', sans-serif;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
